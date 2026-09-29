@@ -23,22 +23,7 @@ real trained ML model, and a patient chat page that answers questions using the 
 - **Patient & Clinician Chat**: Grounded in live sensor context and Qdrant RAG literature citations with
   clickable links to the Knowledge Graph.
 
-## Be upfront with your reviewer about the data
 
-You only gave me 14 labelled rows (`data/wound_data.csv`). That is too few to train anything
-stable, so `train_model.py`:
-
-1. Fits a per-class Gaussian (mean + covariance) to your 14 rows and **samples synthetic rows**
-   from it (clipped to plausible sensor ranges) — a documented small-data augmentation
-   technique, not fabricated "real" data pretending to be real.
-2. Has **no dataset at all** for days-to-heal, so it computes it from a transparent severity
-   heuristic (see the big docstring/comments in `synthesize_healing_days`) — distance of each
-   reading from a "healthy" centroid, mapped to a day range per condition, plus noise.
-
-Both of these facts are printed in the terminal when you run the training script and saved to
-`models/metadata.json`, and the dashboard's disclaimer footer says so too. When you get a real
-longitudinal dataset (or your RAG-grounded estimate), you only need to redo this one script —
-the rest of the app (`app.py`, templates) doesn't change.
 
 ## Setup
 

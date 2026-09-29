@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sign up · WoundSense</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-brand"><span class="dot"></span><span>WoundSense</span></div>
+      <h1>Create your account</h1>
+      <p class="sub">Set up access to your smart bandage dashboard.</p>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <form id="signupForm">
+        <div class="field">
+          <label for="name">Name</label>
+          <input type="text" id="name" required autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" required autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" required autocomplete="new-password" />
+        </div>
+        <button type="submit" class="btn-primary">Create account</button>
+      </form>
+
+      <div class="auth-switch">Already have an account? <a href="{{ url_for('login_page') }}">Log in</a></div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('signupForm');
+    const errorMsg = document.getElementById('errorMsg');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.style.display = 'none';
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('name').value,
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        errorMsg.textContent = data.error || 'Something went wrong.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+      window.location.href = data.redirect;
+    });
+  </script>
+</body>
+</html>

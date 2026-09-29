@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+{% from "_sidebar.html" import sidebar %}
+<head>
+  <meta charset="utf-8" />
+  <title>Wound details · WoundSense</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <div class="shell">
+    {{ sidebar('wound_details', user_name) }}
+
+    <main class="main">
+      <div class="page-header">
+        <h1>Wound details</h1>
+        <span class="meta">This context is sent to the chat assistant alongside sensor readings</span>
+      </div>
+
+      <div class="card" style="max-width:560px;">
+        <h2>Tell us about the wound</h2>
+
+        <div class="field">
+          <label for="cause">How did it happen?</label>
+          <input type="text" id="cause" placeholder="e.g. surgical incision, diabetic ulcer, fall/cut" value="{{ context.cause if context else '' }}" />
+        </div>
+
+        <div class="field">
+          <label for="severity">Self-rated severity</label>
+          <select id="severity" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:#fff;">
+            <option value="mild" {{ 'selected' if context and context.severity == 'mild' }}>Mild</option>
+            <option value="moderate" {{ 'selected' if context and context.severity == 'moderate' }}>Moderate</option>
+            <option value="severe" {{ 'selected' if context and context.severity == 'severe' }}>Severe</option>
+          </select>
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="label">Pain level</span>
+            <span class="value" id="val-pain">{{ context.pain_level if context else 3 }}</span>
+          </div>
+          <input type="range" id="pain_level" min="0" max="10" step="1" value="{{ context.pain_level if context else 3 }}" />
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="label">Itching level</span>
+            <span class="value" id="val-itch">{{ context.itching_level if context else 2 }}</span>
+          </div>
+          <input type="range" id="itching_level" min="0" max="10" step="1" value="{{ context.itching_level if context else 2 }}" />
+        </div>
+
+        <div class="field">
+          <label for="days_since_onset">Days since the wound occurred</label>
+          <input type="number" id="days_since_onset" min="0" value="{{ context.days_since_onset if context else 1 }}" />
+        </div>
+
+        <div class="field">
+          <label for="notes">Anything else worth mentioning?</label>
+          <input type="text" id="notes" placeholder="e.g. redness spreading, fever, discharge smell" value="{{ context.notes if context else '' }}" />
+        </div>
+
+        <button class="btn-primary" id="saveBtn" style="max-width:200px;">Save details</button>
+        <div id="savedMsg" style="display:none; margin-top:10px; font-size:12.5px; color:var(--ok);">Saved.</div>
+      </div>
+
+      {% if context_history %}
+      <div class="card" style="max-width:560px; margin-top:22px;">
+        <h2>Previous entries</h2>
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Cause</th><th>Severity</th><th>Pain</th><th>Itching</th></tr></thead>
+          <tbody>
+            {% for c in context_history %}
+            <tr>
+              <td>{{ c.created_at[:10] }}</td>
+              <td>{{ c.cause or "—" }}</td>
+              <td>{{ c.severity or "—" }}</td>
+              <td>{{ c.pain_level }}/10</td>
+              <td>{{ c.itching_level }}/10</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </main>
+  </div>
+
+  <script>
+    const painSlider = document.getElementById('pain_level');
+    const itchSlider = document.getElementById('itching_level');
+    painSlider.addEventListener('input', () => document.getElementById('val-pain').textContent = painSlider.value);
+    itchSlider.addEventListener('input', () => document.getElementById('val-itch').textContent = itchSlider.value);
+
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      const payload = {
+        cause: document.getElementById('cause').value,
+        severity: document.getElementById('severity').value,
+        pain_level: painSlider.value,
+        itching_level: itchSlider.value,
+        days_since_onset: document.getElementById('days_since_onset').value,
+        notes: document.getElementById('notes').value,
+      };
+      const res = await fetch('/api/wound-context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const msg = document.getElementById('savedMsg');
+        msg.style.display = 'block';
+        setTimeout(() => window.location.reload(), 700);
+      }
+    });
+  </script>
+</body>
+</html>

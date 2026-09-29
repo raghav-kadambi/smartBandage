@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+{% from "_sidebar.html" import sidebar %}
+<head>
+  <meta charset="utf-8" />
+  <title>Model insights · WoundSense</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <div class="shell">
+    {{ sidebar('insights', user_name) }}
+
+    <main class="main">
+      <div class="page-header">
+        <h1>Model insights</h1>
+        <span class="meta" id="trainedAt">—</span>
+      </div>
+
+      <div id="qualityBanner" class="quality-banner"></div>
+
+      <div class="insights-grid">
+        <div class="card">
+          <h2>Training data composition</h2>
+          <div id="dataComposition"></div>
+        </div>
+
+        <div class="card">
+          <h2>Condition classifier</h2>
+          <div class="metric-pair">
+            <div>
+              <div class="metric-big" id="accAll">—</div>
+              <div class="metric-label">Accuracy (all held-out rows)</div>
+            </div>
+            <div>
+              <div class="metric-big" id="accReal">—</div>
+              <div class="metric-label">Accuracy (real rows only)</div>
+            </div>
+          </div>
+          <div id="perClassTable"></div>
+        </div>
+
+        <div class="card">
+          <h2>Confusion matrix (held-out set)</h2>
+          <div id="confusionMatrix" style="overflow-x:auto;"></div>
+        </div>
+
+        <div class="card">
+          <h2>Healing-days regressor</h2>
+          <div class="metric-pair">
+            <div>
+              <div class="metric-big" id="maeVal">—</div>
+              <div class="metric-label">Mean absolute error (days)</div>
+            </div>
+            <div>
+              <div class="metric-big" id="r2Val">—</div>
+              <div class="metric-label">R² (held-out)</div>
+            </div>
+          </div>
+          <div class="disclaimer" style="margin-top:12px; padding-top:0; border-top:none;">
+           
+          </div>
+        </div>
+
+        <div class="card full">
+          <h2>Feature importance</h2>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:28px;">
+            <div>
+              <div class="metric-label" style="margin-bottom:10px;">For predicting condition</div>
+              <div id="featImportanceClf"></div>
+            </div>
+            <div>
+              <div class="metric-label" style="margin-bottom:10px;">For predicting healing days</div>
+              <div id="featImportanceReg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/insights.js') }}"></script>
+</body>
+</html>

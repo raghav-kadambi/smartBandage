@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+{% from "_sidebar.html" import sidebar %}
+<head>
+  <meta charset="utf-8" />
+  <title>Patient chat · WoundSense</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <div class="shell">
+    {{ sidebar('patient', user_name) }}
+
+    <main class="main">
+      <div class="page-header">
+        <h1>Ask about your wound</h1>
+        <span class="meta">Answers use your latest sensor reading as context</span>
+      </div>
+
+      <div class="patient-layout">
+        <div class="context-strip">
+          {% if latest %}
+          <span class="context-chip">Condition: <strong>{{ latest.condition }}</strong></span>
+          <span class="context-chip">pH: <strong>{{ "%.2f"|format(latest.ph) }}</strong></span>
+          <span class="context-chip">Temp: <strong>{{ "%.1f"|format(latest.temperature) }}°C</strong></span>
+          <span class="context-chip">Humidity: <strong>{{ "%.0f"|format(latest.humidity) }}%</strong></span>
+          <span class="context-chip">Exudate: <strong>{{ "%.1f"|format(latest.exudate_level) }}</strong></span>
+          <span class="context-chip">O2 sat: <strong>{{ "%.0f"|format(latest.oxygen_saturation) }}%</strong></span>
+          <span class="context-chip">Est. healing: <strong>{{ "%.1f"|format(latest.healing_days) }} days</strong></span>
+          {% else %}
+          <span class="context-chip">No sensor reading yet — visit the Dashboard first.</span>
+          {% endif %}
+          {% if context %}
+          <span class="context-chip">Pain: <strong>{{ context.pain_level }}/10</strong></span>
+          <span class="context-chip">Itching: <strong>{{ context.itching_level }}/10</strong></span>
+          <span class="context-chip">Onset: <strong>{{ context.days_since_onset }} days ago</strong></span>
+          {% else %}
+          <span class="context-chip">No wound details yet — <a href="{{ url_for('wound_details_page') }}" style="color:var(--accent);">add them here</a></span>
+          {% endif %}
+        </div>
+
+        <div class="chat-panel">
+          <div class="chat-messages" id="chatMessages">
+            {% if not history %}
+            <div class="msg empty-hint">Ask something like "why is my exudate level high?"</div>
+            {% endif %}
+            {% for m in history %}
+            <div class="msg {{ m.role }}">{{ m.content }}</div>
+            {% endfor %}
+          </div>
+          {% if not history %}
+          <div class="suggested-row" id="suggestedRow">
+            <button class="suggested-chip">Why is my exudate level high?</button>
+            <button class="suggested-chip">Is my wound infected?</button>
+            <button class="suggested-chip">How many more days until it heals?</button>
+            <button class="suggested-chip">What should I do to help it heal faster?</button>
+          </div>
+          {% endif %}
+          <div class="chat-input-bar">
+            <input type="text" id="chatInput" placeholder="Ask a question about your wound..." autocomplete="off" />
+            <button class="chat-send" id="chatSend">Send</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>

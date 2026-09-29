@@ -1,0 +1,127 @@
+{
+  "trained_at": "2026-09-08T19:18:48.229271+00:00",
+  "data_source_file": "wound_data_train.csv",
+  "features": [
+    "pH",
+    "temperature",
+    "humidity",
+    "exudate_level",
+    "oxygen_saturation"
+  ],
+  "feature_ranges": {
+    "pH": [
+      4.0,
+      10.0
+    ],
+    "temperature": [
+      25.0,
+      40.0
+    ],
+    "humidity": [
+      10.0,
+      100.0
+    ],
+    "exudate_level": [
+      0.0,
+      10.0
+    ],
+    "oxygen_saturation": [
+      30.0,
+      100.0
+    ]
+  },
+  "classes": [
+    "healthy",
+    "infected",
+    "wound_healing"
+  ],
+  "data_quality": {
+    "seed_rows_total": 20000,
+    "seed_class_distribution": {
+      "infected": 8055,
+      "healthy": 5986,
+      "wound_healing": 5959
+    },
+    "training_rows_total": 20000,
+    "training_rows_real": 20000,
+    "training_rows_synthetic": 0,
+    "synthetic_pct": 0.0,
+    "training_class_distribution": {
+      "infected": 8055,
+      "healthy": 5986,
+      "wound_healing": 5959
+    },
+    "augmentation_method": "Per-class Gaussian (mean+covariance) fit to real rows, sampled and clipped to plausible sensor ranges, only topping classes up to 250 rows.",
+    "healing_days_source": "Heuristic severity score (distance from a healthy centroid), NOT learned from real patient outcomes -- no real healing-time dataset exists yet."
+  },
+  "condition_model": {
+    "algorithm": "RandomForestClassifier",
+    "accuracy_holdout_all": 0.991,
+    "accuracy_holdout_real_only": 0.991,
+    "real_only_test_n": 4000,
+    "per_class": [
+      {
+        "class": "healthy",
+        "precision": 0.986,
+        "recall": 0.992,
+        "f1": 0.989,
+        "support": 1197
+      },
+      {
+        "class": "infected",
+        "precision": 0.996,
+        "recall": 0.997,
+        "f1": 0.997,
+        "support": 1611
+      },
+      {
+        "class": "wound_healing",
+        "precision": 0.987,
+        "recall": 0.981,
+        "f1": 0.984,
+        "support": 1192
+      }
+    ],
+    "confusion_matrix": [
+      [
+        1187,
+        0,
+        10
+      ],
+      [
+        0,
+        1606,
+        5
+      ],
+      [
+        17,
+        6,
+        1169
+      ]
+    ],
+    "confusion_matrix_labels": [
+      "healthy",
+      "infected",
+      "wound_healing"
+    ],
+    "feature_importance": {
+      "pH": 0.014,
+      "temperature": 0.089,
+      "humidity": 0.121,
+      "exudate_level": 0.457,
+      "oxygen_saturation": 0.319
+    }
+  },
+  "healing_model": {
+    "algorithm": "RandomForestRegressor",
+    "mae_days_holdout": 0.98,
+    "r2_holdout": 0.985,
+    "feature_importance": {
+      "pH": 0.002,
+      "temperature": 0.003,
+      "humidity": 0.005,
+      "exudate_level": 0.115,
+      "oxygen_saturation": 0.874
+    }
+  }
+}

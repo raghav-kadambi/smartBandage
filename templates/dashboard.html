@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+{% from "_sidebar.html" import sidebar %}
+<head>
+  <meta charset="utf-8" />
+  <title>Dashboard · WoundSense</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <div class="shell">
+    {{ sidebar('dashboard', user_name) }}
+
+    <main class="main">
+      <div class="page-header">
+        <h1>Live sensor dashboard</h1>
+        <span class="meta" id="readingCountMeta">Demo mode — move the sliders to simulate bandage readings</span>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Sensor inputs</h2>
+
+          <div class="preset-row">
+            <button class="preset-btn healthy" data-preset="healthy"><span class="dot"></span>Healthy example</button>
+            <button class="preset-btn wound_healing" data-preset="wound_healing"><span class="dot"></span>Healing example</button>
+            <button class="preset-btn infected" data-preset="infected"><span class="dot"></span>Infected example</button>
+          </div>
+
+          <div id="sliders"></div>
+        </div>
+
+        <div class="card">
+          <h2>Model prediction</h2>
+          <div id="conditionBadge" class="result-condition healthy">
+            <span class="ic"></span><span id="conditionLabel">—</span>
+          </div>
+
+          <div class="stat-row">
+            <span class="k">Confidence</span>
+            <span class="v" id="confidenceVal">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="k">Estimated days to heal</span>
+            <span class="v" id="healingDaysVal">—</span>
+          </div>
+
+          <div style="margin-top:16px;" id="probBars"></div>
+
+          <div class="disclaimer">
+            
+            
+            
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:22px;">
+        <h2>Recent readings <span style="color:var(--text-faint); font-weight:400;">(this session)</span></h2>
+        <div id="historyTable">
+          <div style="color:var(--text-faint); font-size:12.5px;">No readings yet — move a slider to generate one.</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script id="slider-ranges-data" type="application/json">{{ slider_ranges | tojson }}</script>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

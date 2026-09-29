@@ -1,6 +1,8 @@
 .env
+env.txt
 venv/
 __pycache__/
 *.pyc
 wound_bandage.db
 .ipynb_checkpoints/
+model_outputs/

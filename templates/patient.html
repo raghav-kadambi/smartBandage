@@ -12,8 +12,13 @@
 
     <main class="main">
       <div class="page-header">
-        <h1>Ask about your wound</h1>
-        <span class="meta">Answers use your latest sensor reading as context</span>
+        <div>
+          <h1>Ask about your wound</h1>
+          <span class="meta">Grounded in real-time sensor readings & Qdrant Medical Literature RAG</span>
+        </div>
+        <div class="rag-live-badge">
+          <span class="pulse-dot"></span> Qdrant Clinical RAG Active
+        </div>
       </div>
 
       <div class="patient-layout">
@@ -41,7 +46,7 @@
         <div class="chat-panel">
           <div class="chat-messages" id="chatMessages">
             {% if not history %}
-            <div class="msg empty-hint">Ask something like "why is my exudate level high?"</div>
+            <div class="msg empty-hint">Ask a question to see RAG literature retrieval and sensor grounding in action.</div>
             {% endif %}
             {% for m in history %}
             <div class="msg {{ m.role }}">{{ m.content }}</div>
@@ -49,10 +54,10 @@
           </div>
           {% if not history %}
           <div class="suggested-row" id="suggestedRow">
-            <button class="suggested-chip">Why is my exudate level high?</button>
-            <button class="suggested-chip">Is my wound infected?</button>
-            <button class="suggested-chip">How many more days until it heals?</button>
-            <button class="suggested-chip">What should I do to help it heal faster?</button>
+            <button class="suggested-chip">Why is my pH alkaline and what literature explains this?</button>
+            <button class="suggested-chip">What clinical thresholds indicate wound infection?</button>
+            <button class="suggested-chip">How does moisture and humidity accelerate epithelization?</button>
+            <button class="suggested-chip">What role does oxygen saturation play in wound healing?</button>
           </div>
           {% endif %}
           <div class="chat-input-bar">

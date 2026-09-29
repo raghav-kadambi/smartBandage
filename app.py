@@ -12,6 +12,8 @@ from flask import (
 from werkzeug.security import generate_password_hash, check_password_hash
 
 import database as db
+from rag_service import rag_service
+from knowledge_graph import kg
 
 ROOT = Path(__file__).resolve().parent
 load_dotenv_path = ROOT / ".env"
@@ -124,6 +126,12 @@ def insights_page():
     return render_template("insights.html", user_name=session.get("user_name"))
 
 
+@app.route("/knowledge-graph")
+@login_required
+def knowledge_graph_page():
+    return render_template("knowledge_graph.html", user_name=session.get("user_name"))
+
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -226,24 +234,24 @@ def api_readings_history():
     return jsonify({"readings": rows})
 
 
-# ---------- chat API ----------
+# ---------- chat API with Qdrant RAG ----------
 
-SYSTEM_PROMPT_TEMPLATE = """You are a calm, clear wound-care assistant embedded in a smart-bandage \
-monitoring app. You are speaking directly to the patient, not a clinician.
+SYSTEM_PROMPT_TEMPLATE = """You are a calm, knowledgeable clinical wound-care assistant embedded in a smart-bandage \
+monitoring app. You are speaking directly to the patient in a warm, reassuring, and scientifically grounded tone.
 
-Current sensor reading for this patient:
+Current sensor reading from the smart bandage for this patient:
 - pH: {pH}
 - Temperature: {temperature} C
 - Humidity: {humidity}%
 - Exudate level: {exudate_level} / 10
 - Oxygen saturation: {oxygen_saturation}%
 
-Model's current assessment:
+Machine Learning Model's current assessment:
 - Predicted wound condition: {condition} (confidence {confidence})
 - Estimated days remaining to heal: {healing_days}
 - Trend vs the previous reading: {trend}
 
-What the patient has told us about the wound itself:
+Patient's reported wound context:
 - How it happened: {cause}
 - Self-rated severity: {severity}
 - Pain level (0-10): {pain_level}
@@ -251,13 +259,15 @@ What the patient has told us about the wound itself:
 - Days since the wound occurred: {days_since_onset}
 - Additional notes from patient: {notes}
 
-Guidelines:
-- Ground your answers in the sensor context above when relevant.
-- Be honest that this is a prototype demo (synthetic training data, no real medical literature \
-retrieval yet -- a RAG layer citing real clinical guidelines is planned next).
-- Never give a definitive diagnosis. Encourage seeing a clinician for anything concerning, \
-especially if the condition looks like "infected".
-- Keep answers short, warm, and easy to read on a phone.
+CLINICAL MEDICAL LITERATURE CONTEXT (Retrieved from Qdrant Vector Knowledge Base):
+{clinical_literature}
+
+Clinical Guidelines & Response Rules:
+1. EVIDENCE-BASED GROUNDING: Answer the patient's question by directly incorporating and citing the relevant retrieved medical literature above.
+2. CITATION SYNTAX: Cite studies in brackets using the author tag provided (e.g. [Schneider et al., 2007], [Armstrong et al., 2007], [Winter, 1962], [Gethin et al., 2007], [Schultz et al., 2003]).
+3. SENSOR CORRELATION: Connect their specific sensor values (pH, Temperature, Humidity, Exudate, O2) to the clinical thresholds documented in the literature (e.g. explain why pH > 7.3 indicates alkaline bacterial environment, why temperature elevation ΔT > 1.1°C signals inflammation, or why maintaining 65-85% humidity promotes moist epithelization).
+4. SAFETY: Never claim to provide a definitive diagnosis or replace their physician. If condition is 'infected' or values are abnormal, clearly advise prompt clinician review.
+5. FORMATTING: Use clean markdown, concise bullet points where appropriate, and keep the explanation easy for a patient or review judge to read.
 """
 
 
@@ -287,6 +297,21 @@ def api_chat():
         else:
             trend = f"stable (still {recent[0]['condition']})"
 
+    # Retrieve relevant clinical literature via Qdrant Vector RAG
+    sensor_dict = {
+        "pH": latest["ph"] if latest else None,
+        "temperature": latest["temperature"] if latest else None,
+        "humidity": latest["humidity"] if latest else None,
+        "exudate_level": latest["exudate_level"] if latest else None,
+        "oxygen_saturation": latest["oxygen_saturation"] if latest else None,
+    }
+    rag_data = rag_service.build_rag_context_for_chat(
+        user_message,
+        sensor_readings=sensor_dict,
+        limit=3,
+    )
+    clinical_literature = rag_data["prompt_text"] or "No specific matching literature excerpt found for this query."
+
     context = {
         "pH": round(latest["ph"], 2) if latest else "unknown",
         "temperature": round(latest["temperature"], 1) if latest else "unknown",
@@ -303,6 +328,7 @@ def api_chat():
         "itching_level": wound_ctx["itching_level"] if wound_ctx else "not provided",
         "days_since_onset": wound_ctx["days_since_onset"] if wound_ctx else "not provided",
         "notes": wound_ctx["notes"] if wound_ctx and wound_ctx["notes"] else "none",
+        "clinical_literature": clinical_literature,
     }
     system_prompt = SYSTEM_PROMPT_TEMPLATE.format(**context)
 
@@ -329,7 +355,7 @@ def api_chat():
             completion = groq_client.chat.completions.create(
                 model=GROQ_MODEL,
                 messages=messages,
-                temperature=1,
+                temperature=0.8,
                 max_completion_tokens=2048,
                 top_p=1,
                 reasoning_effort="medium",
@@ -346,10 +372,47 @@ def api_chat():
             full_reply = err_msg
             yield err_msg
         finally:
+            citations = rag_data.get("citations") or []
+            if citations:
+                cit_marker = "\n\n__CITATIONS__:" + json.dumps(citations)
+                full_reply += cit_marker
+                yield cit_marker
             if full_reply:
                 db.save_chat_message(user_id, "assistant", full_reply)
 
     return Response(stream_with_context(generate()), mimetype="text/plain")
+
+
+# ---------- Knowledge Graph & RAG APIs ----------
+
+@app.route("/api/graph/data")
+@login_required
+def api_graph_data():
+    """Returns the full knowledge graph elements and summary stats."""
+    return jsonify(kg.to_cytoscape_json())
+
+
+@app.route("/api/graph/node/<node_id>")
+@login_required
+def api_graph_node(node_id):
+    """Returns neighborhood and full clinical details for a selected node."""
+    details = kg.get_node_details(node_id)
+    if not details:
+        return jsonify({"error": "Node not found"}), 404
+    return jsonify(details)
+
+
+@app.route("/api/rag/search")
+@login_required
+def api_rag_search():
+    """Standalone semantic search into the clinical literature vector database."""
+    query = request.args.get("q", "").strip()
+    sensor = request.args.get("sensor")
+    limit = int(request.args.get("limit", 4))
+    if not query:
+        return jsonify({"results": []})
+    results = rag_service.search(query, limit=limit, biomarker_filter=sensor)
+    return jsonify({"results": results})
 
 
 

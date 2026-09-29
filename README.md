@@ -14,9 +14,14 @@ real trained ML model, and a patient chat page that answers questions using the 
 - **Dashboard**: 5 sliders (pH, temperature, humidity, exudate level, oxygen saturation) that
   call `/api/predict` live and show the predicted condition, confidence, class probabilities,
   and estimated healing days.
-- **Patient chat**: a bottom chat bar that sends your question + your latest sensor reading to
-  an LLM via OpenRouter and stores the conversation in SQLite. RAG retrieval isn't wired in yet
-  — the system prompt says so honestly — that's your next milestone per the PPT.
+- **Clinical Literature RAG (Qdrant Vector DB)**: Embedded Qdrant vector database indexing 20 peer-reviewed
+  wound care & biosensor papers using FastEmbed (BAAI/bge-small-en-v1.5 dense vectors). Answers
+  retrieve relevant literature based on the query AND active sensor anomalies, citing studies in real time.
+- **Interactive Knowledge Graph (NetworkX + vis-network)**: Multi-relational graph connecting 20 papers,
+  5 sensors, 7 clinical states, and 6 interventions across 43 interconnected paper citations. Includes
+  centrality calculation, sensor focus filtering, and a slide-out Clinical Inspector drawer.
+- **Patient & Clinician Chat**: Grounded in live sensor context and Qdrant RAG literature citations with
+  clickable links to the Knowledge Graph.
 
 ## Be upfront with your reviewer about the data
 
@@ -83,16 +88,36 @@ smart-bandage/
     └── patient.html
 ```
 
-## Honest gaps to mention in your review (and what's next)
+## Demo highlights for your capstone review
+- **Clinical RAG is live**: The system retrieves peer-reviewed wound care literature from an embedded Qdrant vector database using 384-dimensional dense semantic search, directly citing authors (e.g. Schneider, Armstrong, Gethin, Winter, Schultz) and thresholds in chat replies.
+- **Knowledge Graph is interactive**: Under `/knowledge-graph`, an interactive force-directed graph visualizes 20 papers, 5 sensors, 7 pathologies, 6 treatments, and 43 cross-citations with sensor filters and an evidence inspector.
+- **No real ESP32/sensor hardware wired in yet**: Sliders stand in for live sensor streaming for this review; the `/api/predict` endpoint is the exact seam where real ESP32 JSON payloads plug in later (same 5 features).
+- **Days-to-heal is a heuristic, not a validated clinical estimate** — say this out loud to your guide, it's the most defensible way to present it.
+- **Classifier accuracy (~99%) is on a held-out split of the *synthetic* augmented data**, not real unseen patients — expect it to look far less clean once real patient data comes in.
 
-- **RAG isn't built yet.** The PPT's LangChain + FAISS + medical-literature-index layer is the
-  next milestone — the chat's system prompt already says "no retrieval yet" so the demo doesn't
-  overclaim.
-- **No real ESP32/sensor hardware wired in.** Sliders stand in for live sensor streaming for
-  this review; the `/api/predict` endpoint is the exact seam where real ESP32 JSON payloads
-  would plug in later (same 5 features).
-- **Days-to-heal is a heuristic, not a validated clinical estimate** — say this out loud to
-  your guide, it's the most defensible way to present it.
-- **classifier accuracy (~99%) is on a held-out split of the *synthetic* augmented data**, not
-  real unseen patients — expect it to look far less clean once real data comes in, which is
-  normal and worth noting proactively.
+## System Design Overview
+
+![System Design Diagram](file:///C:/Users/Tanu/.gemini/antigravity/brain/b351f9a7-9c59-4e4d-80e9-5240d658cc13/.user_uploaded/media_1790702475199.png)
+
+The **WoundSense** demo integrates several components to provide a full‑stack smart wound‑care platform:
+
+- **Authentication & Persistence** – Flask session‑based login/signup, SQLite (`wound_bandage.db`).
+- **Sensor Dashboard** – Five sliders (pH, temperature, humidity, exudate, oxygen) send live readings to `/api/predict`, which runs the trained ML models (`condition_model.pkl`, `healing_model.pkl`).
+- **Clinical Literature RAG** – An **in‑memory Qdrant** vector store (384‑dim embeddings via FastEmbed) indexes 20 peer‑reviewed papers. The `LiteratureRAGService` retrieves relevant passages based on the current sensor context and query, and returns structured citations.
+- **Knowledge Graph** – Built with NetworkX, the graph captures relationships among papers, biomarkers, clinical states, and interventions. It is served as Cytoscape‑compatible JSON and visualised with **vis‑network** on the `/knowledge-graph` page.
+- **Chat Interface** – The LLM receives a system prompt that includes live sensor data **and** the RAG‑generated literature block. After the response stream ends, the backend appends a hidden `__CITATIONS__:` JSON marker containing citation metadata.
+- **Front‑end Citation Rendering** – `static/js/chat.js` parses the marker, renders a **Sources** block with pill‑style citation links (see image below), and links each citation back to the Knowledge Graph for deeper exploration.
+
+Data flow:
+```
+Sensor sliders → /api/predict → ML models → Dashboard
+Sensor readings + user query → RAG service → literature context → LLM prompt → streamed answer → __CITATIONS__ marker → chat UI renders sources
+```
+
+## Citation UI in Chat
+
+![Citation UI Example](file:///C:/Users/Tanu/.gemini/antigravity/brain/b351f9a7-9c59-4e4d-80e9-5240d658cc13/.user_uploaded/media_1790702561703.png)
+
+The chat view now displays a **Sources** block at the bottom of each LLM answer. Each source is shown as a pill with the paper title and a link to its DOI or to the corresponding node in the Knowledge Graph. This mimics the citation style of mainstream LLM products and gives reviewers a clear trace from answer to evidence.
+
+---

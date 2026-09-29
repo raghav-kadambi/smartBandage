@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+{% from "_sidebar.html" import sidebar %}
+<head>
+  <meta charset="utf-8" />
+  <title>Knowledge Graph · WoundSense</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <!-- vis-network for high-performance interactive force-directed graph -->
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+  <div class="shell">
+    {{ sidebar('knowledge_graph', user_name) }}
+
+    <main class="main kg-main">
+      <div class="page-header kg-header">
+        <div>
+          <h1>Clinical Knowledge Graph</h1>
+          <span class="meta">Interconnected medical literature, sensor thresholds, and chronic wound pathology network</span>
+        </div>
+        <div class="kg-stat-pills" id="kgStatPills">
+          <span class="stat-pill"><strong id="statPapers">20</strong> Papers</span>
+          <span class="stat-pill"><strong id="statSensors">5</strong> Sensors</span>
+          <span class="stat-pill"><strong id="statConditions">7</strong> States</span>
+          <span class="stat-pill"><strong id="statCitations">43</strong> Citations</span>
+          <span class="stat-pill sync-pill"><span class="pulse-dot"></span> Qdrant Synced</span>
+        </div>
+      </div>
+
+      <!-- Controls & Filter Toolbar -->
+      <div class="kg-toolbar">
+        <div class="kg-filter-group">
+          <span class="toolbar-label">Category:</span>
+          <button class="filter-chip active" data-filter="all">All Entities</button>
+          <button class="filter-chip" data-filter="paper">Papers (20)</button>
+          <button class="filter-chip" data-filter="biomarker">Sensors (5)</button>
+          <button class="filter-chip" data-filter="condition">Clinical States (7)</button>
+          <button class="filter-chip" data-filter="intervention">Interventions (6)</button>
+        </div>
+
+        <div class="kg-filter-group">
+          <span class="toolbar-label">Focus Sensor:</span>
+          <button class="sensor-pill active" data-sensor="all">All</button>
+          <button class="sensor-pill" data-sensor="pH">pH</button>
+          <button class="sensor-pill" data-sensor="temperature">Temperature</button>
+          <button class="sensor-pill" data-sensor="humidity">Humidity</button>
+          <button class="sensor-pill" data-sensor="exudate_level">Exudate</button>
+          <button class="sensor-pill" data-sensor="oxygen_saturation">Oxygen</button>
+        </div>
+
+        <div class="kg-search-wrap">
+          <input type="text" id="kgSearchInput" placeholder="Search paper, author, threshold..." autocomplete="off" />
+          <button class="btn-sm" id="btnFitGraph" title="Fit to Screen">Fit</button>
+          <button class="btn-sm" id="btnResetPhysics" title="Stabilize Physics">Stabilize</button>
+        </div>
+      </div>
+
+      <!-- Graph Container & Inspector Layout -->
+      <div class="kg-workspace">
+        <div class="kg-canvas-container" id="kgCanvas">
+          <div class="kg-loading" id="kgLoading">
+            <div class="spinner"></div>
+            <span>Constructing Knowledge Graph & Synapse Weights...</span>
+          </div>
+        </div>
+
+        <!-- Right Side Clinical Inspector Panel -->
+        <aside class="kg-inspector" id="kgInspector">
+          <div class="inspector-header">
+            <div class="inspector-badge" id="inspTypeBadge">ENTITY DETAILS</div>
+            <button class="inspector-close" id="inspCloseBtn">&times;</button>
+          </div>
+
+          <div class="inspector-body" id="inspBody">
+            <div class="inspector-empty-state">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+              <h3>Interactive Clinical Inspector</h3>
+              <p>Click any node in the network to inspect peer-reviewed literature, sensor thresholds, citation connections, and clinical evidence.</p>
+              <div class="inspector-quick-tips">
+                <div class="tip-item"><strong>📄 Papers:</strong> Full abstract, DOI, key findings, and citations</div>
+                <div class="tip-item"><strong>🩺 Sensors:</strong> Normal/abnormal ranges and pathophysiology</div>
+                <div class="tip-item"><strong>⚠️ States:</strong> Sensor signatures and clinical rules</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Bottom Legend -->
+      <div class="kg-legend">
+        <div class="legend-item"><span class="legend-dot dot-paper"></span> Literature Paper</div>
+        <div class="legend-item"><span class="legend-dot dot-sensor"></span> Physiological Sensor</div>
+        <div class="legend-item"><span class="legend-dot dot-condition"></span> Wound Pathology / State</div>
+        <div class="legend-item"><span class="legend-dot dot-intervention"></span> Clinical Intervention</div>
+        <div class="legend-item"><span class="legend-line line-cite"></span> Paper Citation (Cites)</div>
+        <div class="legend-item"><span class="legend-line line-investigates"></span> Investigates / Evidences</div>
+        <div class="legend-item"><span class="legend-line line-indicates"></span> Indicates Threshold</div>
+      </div>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/knowledge_graph.js') }}"></script>
+</body>
+</html>

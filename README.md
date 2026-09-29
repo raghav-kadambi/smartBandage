@@ -82,7 +82,82 @@ smart-bandage/
 
 ## System Design Overview
 
-![System Design Diagram](file:///C:/Users/Tanu/.gemini/antigravity/brain/b351f9a7-9c59-4e4d-80e9-5240d658cc13/.user_uploaded/media_1790702475199.png)
+```mermaid
+flowchart LR
+  subgraph Client[Browser]
+    Pages["Flask-rendered pages<br/>login, dashboard, patient chat,<br/>wound details, insights, graph"]
+    BrowserJS["JavaScript + CSS<br/>fetch APIs, update views,<br/>stream chat, draw graph"]
+    Pages --> BrowserJS
+  end
+
+  subgraph Runtime[Flask application - app.py]
+    Routes["Page routes + JSON APIs<br/>session-protected workflows"]
+    Auth["Signup / login<br/>password hashing + session"]
+    Predict["/api/predict<br/>validate 5 sensor values"]
+    Models["Loaded model artifacts<br/>RandomForest classifier<br/>RandomForest regressor<br/>LabelEncoder"]
+    Chat["/api/chat<br/>assemble patient context + stream"]
+    Prompt["Clinical prompt<br/>sensor reading + trend + wound details<br/>+ retrieved literature"]
+    RAG["LiteratureRAGService<br/>FastEmbed query vectors + semantic search"]
+    Qdrant["Embedded Qdrant collection<br/>in-process memory"]
+    KGAPI["Knowledge graph APIs<br/>data + node detail"]
+    KG["NetworkX graph<br/>built in-process"]
+    Metrics["Model info / metrics APIs"]
+
+    Routes --> Auth
+    Routes --> Predict
+    Predict --> Models
+    Routes --> Chat
+    Chat --> RAG
+    RAG --> Qdrant
+    Chat --> Prompt
+    RAG --> Prompt
+    Routes --> KGAPI
+    KGAPI --> KG
+    Routes --> Metrics
+  end
+
+  subgraph Storage[Local files]
+    SQLite[("SQLite: wound_bandage.db<br/>users, readings, chat, wound context")]
+    Artifacts["models/*.pkl + metadata.json"]
+    Corpus["data/literature_data.py<br/>curated papers + clinical definitions"]
+    EmbedCache["data/literature_embeddings.pkl<br/>embedding/index cache"]
+    TrainingCSV["data/wound_data_train.csv"]
+    TrainingOutputs["augmented_training_data.csv<br/>models/*.pkl + metadata.json"]
+    NotebookOutputs["model_outputs/<br/>benchmark tables + figures"]
+  end
+
+  subgraph Training[Offline training and analysis]
+    Trainer["models/train_model.py<br/>augment data + heuristic healing target<br/>fit/evaluate Random Forests"]
+    Notebook["model_training.ipynb<br/>compare Random Forest, MLP<br/>and other benchmark models"]
+    TrainingCSV --> Trainer
+    Trainer --> TrainingOutputs
+    TrainingCSV --> Notebook
+    Notebook --> NotebookOutputs
+  end
+
+  Groq["Optional Groq API<br/>GROQ_API_KEY required for LLM"]
+  Vis["vis-network CDN"]
+
+  BrowserJS <-->|"HTTP / JSON"| Routes
+  BrowserJS -->|"simulated slider values"| Predict
+  Predict -->|"prediction + confidence + estimate"| BrowserJS
+  Predict -->|"save each reading"| SQLite
+  Auth <-->|"users"| SQLite
+  Chat <-->|"read context + persist messages"| SQLite
+  Prompt -->|"when configured"| Groq
+  Groq -->|"streamed answer"| Chat
+  Chat -->|"answer + citation marker"| BrowserJS
+  RAG -->|"load corpus"| Corpus
+  RAG <-->|"load/save cache"| EmbedCache
+  KG -->|"load graph facts"| Corpus
+  Models <--|"load at startup"| Artifacts
+  TrainingOutputs --> Artifacts
+  Metrics -->|"metadata.json"| Artifacts
+  KGAPI -->|"graph JSON"| BrowserJS
+  BrowserJS -->|"render interactive graph"| Vis
+```
+
+The sensor inputs currently come from dashboard sliders, not physical hardware. Qdrant is created in memory at application startup; `data/literature_embeddings.pkl` caches embeddings, while `wound_bandage.db` stores user and patient data across runs. The training notebook is an analysis/benchmark workflow; the Flask app loads the artifacts produced by `models/train_model.py`.
 
 The **WoundSense** demo integrates several components to provide a full‑stack smart wound‑care platform:
 

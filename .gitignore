@@ -6,3 +6,6 @@ __pycache__/
 wound_bandage.db
 .ipynb_checkpoints/
 model_outputs/
+# PhysioNet 2019 external test data (downloaded by validation/download_physionet2019.py)
+data/physionet_2019/
+.venv/

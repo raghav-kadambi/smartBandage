@@ -1,186 +1,103 @@
 """
-Train two models for the Smart Wound-Care Bandage demo, and record honest, detailed
-quality metrics so the app's "Model insights" page can show the reviewer exactly how
-good (or not) the models are, and how much of the training data is real vs synthetic.
+Train the two WoundSense Random Forest models on the 4 bandage signals
+(temperature, humidity, heart rate, blood pressure as systolic + diastolic):
 
-1. condition_model  -> classifies sensor readings into healthy / wound_healing / infected
-2. healing_model    -> regresses estimated days-to-heal from sensor readings
+1. condition_model -> classifies a reading as healthy / wound_healing / infected
+2. healing_model   -> regresses estimated days-to-heal
 
-Change DATA_PATH below to point at whatever labelled CSV you currently have
-(pH, temperature, humidity, exudate_level, oxygen_saturation, condition columns).
+Training data: data/wound_data_train.csv, the knowledge-based set produced by
+data/generate_training_data.py (class distributions set from published clinical criteria).
+Internal metrics below are on a held-out split of that set. The *external* test on real
+patients (PhysioNet 2019, never used for training) is validation/validate_physionet2019.py.
+
+Usage:  python models/train_model.py
 """
 
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
     accuracy_score,
-    mean_absolute_error,
-    r2_score,
     confusion_matrix,
+    f1_score,
+    mean_absolute_error,
     precision_recall_fscore_support,
+    r2_score,
 )
+from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test_split
 from sklearn.preprocessing import LabelEncoder
-import joblib
 
 ROOT = Path(__file__).resolve().parent.parent
-
-# ---- point this at your current labelled CSV ----
 DATA_PATH = ROOT / "data" / "wound_data_train.csv"
-
 OUT_DIR = ROOT / "models"
 
-FEATURES = ["pH", "temperature", "humidity", "exudate_level", "oxygen_saturation"]
-RNG = np.random.default_rng(42)
-
+FEATURES = ["temperature", "humidity", "heart_rate", "systolic_bp", "diastolic_bp"]
 FEATURE_RANGES = {
-    "pH": (4.0, 10.0),
-    "temperature": (25.0, 40.0),
+    "temperature": (34.0, 42.0),
     "humidity": (10.0, 100.0),
-    "exudate_level": (0.0, 10.0),
-    "oxygen_saturation": (30.0, 100.0),
+    "heart_rate": (35.0, 180.0),
+    "systolic_bp": (70.0, 200.0),
+    "diastolic_bp": (35.0, 120.0),
 }
 
-AUGMENT_TARGET_PER_CLASS = 250
+CLF_PARAMS = dict(n_estimators=300, max_depth=12, min_samples_leaf=5, random_state=42, n_jobs=-1)
+REG_PARAMS = dict(n_estimators=300, max_depth=12, min_samples_leaf=5, random_state=42, n_jobs=-1)
 
 
-def load_seed_data():
+def load_data():
     df = pd.read_csv(DATA_PATH)
-    missing = set(FEATURES + ["condition"]) - set(df.columns)
+    missing = set(FEATURES + ["condition", "healing_days"]) - set(df.columns)
     if missing:
-        raise ValueError(f"CSV is missing required columns: {missing}")
-    bad_labels = set(df["condition"].unique()) - {"healthy", "wound_healing", "infected"}
-    if bad_labels:
-        raise ValueError(
-            f"Unexpected condition labels found: {bad_labels}. "
-            "Expected only healthy / wound_healing / infected."
-        )
+        raise ValueError(f"{DATA_PATH.name} is missing columns {missing}; run data/generate_training_data.py")
     return df
 
 
-def augment_gaussian(df, target_per_class=AUGMENT_TARGET_PER_CLASS):
-    """Fit a per-class Gaussian to real rows and sample synthetic rows from it, ONLY
-    topping a class up to `target_per_class` -- classes with enough real data already
-    are left alone (or barely touched). Every row is tagged is_synthetic so the app
-    can report the real-vs-synthetic mix honestly."""
-    df = df.copy()
-    df["is_synthetic"] = False
-    frames = [df]
-
-    for cond, group in df.groupby("condition"):
-        n_real = len(group)
-        n_needed = max(0, target_per_class - n_real)
-        if n_needed == 0:
-            continue
-        X = group[FEATURES].values
-        mean = X.mean(axis=0)
-        cov = np.cov(X, rowvar=False) + np.eye(len(FEATURES)) * 1e-2 if n_real > 1 else np.eye(len(FEATURES)) * 0.5
-        samples = RNG.multivariate_normal(mean, cov, size=n_needed)
-        for i, feat in enumerate(FEATURES):
-            lo, hi = FEATURE_RANGES[feat]
-            samples[:, i] = np.clip(samples[:, i], lo, hi)
-        synth = pd.DataFrame(samples, columns=FEATURES)
-        synth["condition"] = cond
-        synth["is_synthetic"] = True
-        frames.append(synth)
-
-    full = pd.concat(frames, ignore_index=True)
-    return full
-
-
-def synthesize_healing_days(df):
-    """Transparent heuristic -> days-to-heal. Not learned from real outcomes -- there is
-    no real longitudinal healing-time dataset yet. Replace this once you have one."""
-    healthy_centroid = {
-        "pH": 7.15, "temperature": 31.5, "humidity": 47.0,
-        "exudate_level": 1.8, "oxygen_saturation": 88.0,
-    }
-    spans = {k: (FEATURE_RANGES[k][1] - FEATURE_RANGES[k][0]) for k in FEATURES}
-
-    severity = np.zeros(len(df))
-    for feat in FEATURES:
-        direction = -1 if feat == "oxygen_saturation" else 1
-        delta = (df[feat] - healthy_centroid[feat]) / spans[feat]
-        severity += np.clip(direction * delta, 0, None)
-    severity = severity / severity.max() if severity.max() > 0 else severity
-
-    base_days = {"healthy": (0, 3), "wound_healing": (5, 16), "infected": (14, 30)}
-    days = np.zeros(len(df))
-    for cond, (lo, hi) in base_days.items():
-        mask = df["condition"] == cond
-        days[mask] = lo + severity[mask] * (hi - lo)
-
-    noise = RNG.normal(0, 1.2, size=len(df))
-    return np.clip(days + noise, 0, 35)
-
-
 def main():
-    seed = load_seed_data()
-    seed_counts = seed["condition"].value_counts().to_dict()
-    print(f"Real (seed) rows: {len(seed)} -> {seed_counts}")
+    df = load_data()
+    counts = df["condition"].value_counts().to_dict()
+    print(f"Training rows: {len(df)} -> {counts}")
 
-    augmented = augment_gaussian(seed)
-    aug_counts = augmented["condition"].value_counts().to_dict()
-    real_count = int((~augmented["is_synthetic"]).sum())
-    synthetic_count = int(augmented["is_synthetic"].sum())
-    print(f"Training rows after augmentation: {len(augmented)} "
-          f"(real: {real_count}, synthetic: {synthetic_count}) -> {aug_counts}")
-
-    augmented["healing_days"] = synthesize_healing_days(augmented)
-
-    X = augmented[FEATURES].values
-    y_class_raw = augmented["condition"].values
-    y_days = augmented["healing_days"].values
-    is_synth = augmented["is_synthetic"].values
-
+    X = df[FEATURES].values
     le = LabelEncoder()
-    y_class = le.fit_transform(y_class_raw)
+    y_class = le.fit_transform(df["condition"].values)
+    y_days = df["healing_days"].values
     class_names = list(le.classes_)
 
-    (X_train, X_test, yc_train, yc_test, yd_train, yd_test,
-     synth_train, synth_test) = train_test_split(
-        X, y_class, y_days, is_synth, test_size=0.2, random_state=42, stratify=y_class
+    X_train, X_test, yc_train, yc_test, yd_train, yd_test = train_test_split(
+        X, y_class, y_days, test_size=0.2, random_state=42, stratify=y_class
     )
 
     # ---- condition classifier ----
-    clf = RandomForestClassifier(n_estimators=300, max_depth=8, random_state=42)
+    clf = RandomForestClassifier(**CLF_PARAMS)
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    cv_acc = cross_val_score(RandomForestClassifier(**CLF_PARAMS), X_train, yc_train, cv=cv, scoring="accuracy")
     clf.fit(X_train, yc_train)
     yc_pred = clf.predict(X_test)
     acc = accuracy_score(yc_test, yc_pred)
+    macro_f1 = f1_score(yc_test, yc_pred, average="macro")
     precision, recall, f1, support = precision_recall_fscore_support(
         yc_test, yc_pred, labels=range(len(class_names)), zero_division=0
     )
     cm = confusion_matrix(yc_test, yc_pred, labels=range(len(class_names)))
-    feat_importance_clf = dict(zip(FEATURES, clf.feature_importances_.tolist()))
-
-    # accuracy measured only on real (non-synthetic) held-out rows, if there are any
-    real_test_mask = synth_test == False  # noqa: E712
-    if real_test_mask.sum() > 0:
-        acc_real_only = accuracy_score(yc_test[real_test_mask], clf.predict(X_test[real_test_mask]))
-    else:
-        acc_real_only = None
-
-    print(f"Condition classifier accuracy (held-out, incl. synthetic): {acc:.3f}")
-    if acc_real_only is not None:
-        print(f"Condition classifier accuracy (held-out, REAL rows only, n={int(real_test_mask.sum())}): {acc_real_only:.3f}")
+    print(f"Classifier: held-out accuracy {acc:.3f}, macro-F1 {macro_f1:.3f}, "
+          f"5-fold CV accuracy {cv_acc.mean():.3f} +/- {cv_acc.std():.3f}")
 
     # ---- healing-days regressor ----
-    reg = RandomForestRegressor(n_estimators=300, max_depth=8, random_state=42)
+    reg = RandomForestRegressor(**REG_PARAMS)
     reg.fit(X_train, yd_train)
     yd_pred = reg.predict(X_test)
     mae = mean_absolute_error(yd_test, yd_pred)
     r2 = r2_score(yd_test, yd_pred)
-    feat_importance_reg = dict(zip(FEATURES, reg.feature_importances_.tolist()))
-    print(f"Healing-days regressor MAE: {mae:.2f} days | R^2: {r2:.3f}")
+    print(f"Regressor: held-out MAE {mae:.2f} days | R^2 {r2:.3f}")
 
     OUT_DIR.mkdir(exist_ok=True)
-    joblib.dump(clf, OUT_DIR / "condition_model.pkl")
-    joblib.dump(reg, OUT_DIR / "healing_model.pkl")
+    joblib.dump(clf, OUT_DIR / "condition_model.pkl", compress=3)
+    joblib.dump(reg, OUT_DIR / "healing_model.pkl", compress=3)
     joblib.dump(le, OUT_DIR / "label_encoder.pkl")
 
     meta = {
@@ -189,31 +106,29 @@ def main():
         "features": FEATURES,
         "feature_ranges": FEATURE_RANGES,
         "classes": class_names,
-
         "data_quality": {
-            "seed_rows_total": int(len(seed)),
-            "seed_class_distribution": {k: int(v) for k, v in seed_counts.items()},
-            "training_rows_total": int(len(augmented)),
-            "training_rows_real": real_count,
-            "training_rows_synthetic": synthetic_count,
-            "synthetic_pct": round(100 * synthetic_count / len(augmented), 1),
-            "training_class_distribution": {k: int(v) for k, v in aug_counts.items()},
-            "augmentation_method": (
-                "Per-class Gaussian (mean+covariance) fit to real rows, sampled and "
-                "clipped to plausible sensor ranges, only topping classes up to "
-                f"{AUGMENT_TARGET_PER_CLASS} rows."
+            "training_rows_total": int(len(df)),
+            "training_class_distribution": {k: int(v) for k, v in counts.items()},
+            "training_data_source": (
+                "Knowledge-based: no public dataset records these signals from a wound dressing with "
+                "healthy/healing/infected labels, so each class is sampled from distributions set by "
+                "published criteria (SIRS, Sepsis-3/qSOFA, moist-healing and hypertension studies). "
+                "See data/generate_training_data.py."
             ),
             "healing_days_source": (
-                "Heuristic severity score (distance from a healthy centroid), NOT learned "
-                "from real patient outcomes -- no real healing-time dataset exists yet."
+                "Heuristic severity score (fever, tachycardia, hypotension, hypertension, humidity away "
+                "from the moist optimum), NOT learned from real patient outcomes."
             ),
+            "external_test_set": "PhysioNet/CinC Challenge 2019 -- used for testing only, never for training.",
         },
-
         "condition_model": {
             "algorithm": "RandomForestClassifier",
-            "accuracy_holdout_all": round(float(acc), 3),
-            "accuracy_holdout_real_only": round(float(acc_real_only), 3) if acc_real_only is not None else None,
-            "real_only_test_n": int(real_test_mask.sum()),
+            "params": {k: v for k, v in CLF_PARAMS.items() if k != "n_jobs"},
+            "accuracy_holdout": round(float(acc), 3),
+            "macro_f1_holdout": round(float(macro_f1), 3),
+            "cv5_accuracy_mean": round(float(cv_acc.mean()), 3),
+            "cv5_accuracy_std": round(float(cv_acc.std()), 3),
+            "holdout_n": int(len(yc_test)),
             "per_class": [
                 {
                     "class": class_names[i],
@@ -226,21 +141,17 @@ def main():
             ],
             "confusion_matrix": cm.tolist(),
             "confusion_matrix_labels": class_names,
-            "feature_importance": {k: round(v, 3) for k, v in feat_importance_clf.items()},
+            "feature_importance": {f: round(float(v), 3) for f, v in zip(FEATURES, clf.feature_importances_)},
         },
-
         "healing_model": {
             "algorithm": "RandomForestRegressor",
+            "params": {k: v for k, v in REG_PARAMS.items() if k != "n_jobs"},
             "mae_days_holdout": round(float(mae), 2),
             "r2_holdout": round(float(r2), 3),
-            "feature_importance": {k: round(v, 3) for k, v in feat_importance_reg.items()},
+            "feature_importance": {f: round(float(v), 3) for f, v in zip(FEATURES, reg.feature_importances_)},
         },
     }
-
-    with open(OUT_DIR / "metadata.json", "w") as f:
-        json.dump(meta, f, indent=2)
-
-    augmented.to_csv(ROOT / "data" / "augmented_training_data.csv", index=False)
+    (OUT_DIR / "metadata.json").write_text(json.dumps(meta, indent=2))
     print("Saved condition_model.pkl, healing_model.pkl, label_encoder.pkl, metadata.json")
 
 

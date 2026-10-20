@@ -1,5 +1,6 @@
 import os
 import json
+import socket
 from pathlib import Path
 
 import joblib
@@ -7,7 +8,7 @@ import numpy as np
 from groq import Groq
 from flask import (
     Flask, request, jsonify, session, redirect, url_for, render_template,
-    Response, stream_with_context,
+    Response, stream_with_context, send_from_directory,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -27,14 +28,23 @@ if load_dotenv_path.exists():
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 
-FEATURES = ["pH", "temperature", "humidity", "exudate_level", "oxygen_saturation"]
+FEATURES = ["temperature", "humidity", "heart_rate", "systolic_bp", "diastolic_bp"]
 SLIDER_RANGES = {
-    "pH": {"min": 4.0, "max": 10.0, "step": 0.05, "default": 7.2},
-    "temperature": {"min": 25.0, "max": 40.0, "step": 0.1, "default": 31.5},
-    "humidity": {"min": 10.0, "max": 100.0, "step": 1, "default": 47},
-    "exudate_level": {"min": 0.0, "max": 10.0, "step": 0.1, "default": 2},
-    "oxygen_saturation": {"min": 30.0, "max": 100.0, "step": 1, "default": 88},
+    "temperature": {"min": 34.0, "max": 42.0, "step": 0.1, "default": 36.8},
+    "humidity": {"min": 10.0, "max": 100.0, "step": 1, "default": 55},
+    "heart_rate": {"min": 40.0, "max": 160.0, "step": 1, "default": 74},
+    "systolic_bp": {"min": 70.0, "max": 200.0, "step": 1, "default": 118},
+    "diastolic_bp": {"min": 40.0, "max": 120.0, "step": 1, "default": 76},
 }
+# Readings outside these bounds are rejected as sensor faults rather than predicted on.
+PLAUSIBLE = {
+    "temperature": (25.0, 45.0),
+    "humidity": (0.0, 100.0),
+    "heart_rate": (20.0, 250.0),
+    "systolic_bp": (50.0, 260.0),
+    "diastolic_bp": (20.0, 160.0),
+}
+INPUT_MODES = {"simulate", "esp32"}
 
 condition_model = joblib.load(ROOT / "models" / "condition_model.pkl")
 healing_model = joblib.load(ROOT / "models" / "healing_model.pkl")
@@ -82,13 +92,27 @@ def signup_page():
     return render_template("signup.html")
 
 
+@app.route("/choose-mode")
+@login_required
+def mode_page():
+    return render_template(
+        "mode_select.html",
+        user_name=session.get("user_name"),
+        current_mode=session.get("input_mode"),
+    )
+
+
 @app.route("/dashboard")
 @login_required
 def dashboard_page():
+    mode = session.get("input_mode")
+    if mode not in INPUT_MODES:
+        return redirect(url_for("mode_page"))
     return render_template(
         "dashboard.html",
         user_name=session.get("user_name"),
         slider_ranges=SLIDER_RANGES,
+        input_mode=mode,
     )
 
 
@@ -169,7 +193,7 @@ def api_signup():
 
     session["user_id"] = user["id"]
     session["user_name"] = user["name"]
-    return jsonify({"ok": True, "redirect": url_for("dashboard_page")})
+    return jsonify({"ok": True, "redirect": url_for("mode_page")})
 
 
 @app.route("/api/login", methods=["POST"])
@@ -187,20 +211,36 @@ def api_login():
 
     session["user_id"] = user["id"]
     session["user_name"] = user["name"]
+    return jsonify({"ok": True, "redirect": url_for("mode_page")})
+
+
+@app.route("/api/mode", methods=["POST"])
+@login_required
+def api_set_mode():
+    mode = (request.get_json(force=True) or {}).get("mode")
+    if mode not in INPUT_MODES:
+        return jsonify({"error": "Mode must be 'simulate' or 'esp32'."}), 400
+    session["input_mode"] = mode
     return jsonify({"ok": True, "redirect": url_for("dashboard_page")})
 
 
-# ---------- prediction API ----------
+# ---------- prediction ----------
 
-@app.route("/api/predict", methods=["POST"])
-@login_required
-def api_predict():
-    data = request.get_json(force=True)
+def parse_features(data):
+    """Return (features, error). Accepts the 5 model inputs from sliders or an ESP32."""
     try:
         features = {f: float(data[f]) for f in FEATURES}
     except (KeyError, TypeError, ValueError):
-        return jsonify({"error": "Missing or invalid sensor values."}), 400
+        return None, f"Missing or invalid sensor values. Expected numeric: {', '.join(FEATURES)}."
+    for f, (lo, hi) in PLAUSIBLE.items():
+        if not lo <= features[f] <= hi:
+            return None, f"{f}={features[f]} is outside the plausible range {lo}-{hi}; check the sensor."
+    if features["diastolic_bp"] >= features["systolic_bp"]:
+        return None, "diastolic_bp must be lower than systolic_bp."
+    return features, None
 
+
+def run_prediction(user_id, features, source):
     x = np.array([[features[f] for f in FEATURES]])
     proba = condition_model.predict_proba(x)[0]
     pred_idx = int(np.argmax(proba))
@@ -213,18 +253,26 @@ def api_predict():
         for i, p in enumerate(proba)
     }
 
-    db.save_reading(session["user_id"], features, condition, confidence, healing_days)
+    db.save_reading(user_id, features, condition, confidence, healing_days, source=source)
 
-    return jsonify(
-        {
-            "condition": condition,
-            "confidence": round(confidence, 3),
-            "class_probs": class_probs,
-            "healing_days": round(healing_days, 1),
-            "features": features,
-            "reading_count": db.get_reading_count(session["user_id"]),
-        }
-    )
+    return {
+        "condition": condition,
+        "confidence": round(confidence, 3),
+        "class_probs": class_probs,
+        "healing_days": round(healing_days, 1),
+        "features": features,
+        "source": source,
+        "reading_count": db.get_reading_count(user_id),
+    }
+
+
+@app.route("/api/predict", methods=["POST"])
+@login_required
+def api_predict():
+    features, err = parse_features(request.get_json(force=True) or {})
+    if err:
+        return jsonify({"error": err}), 400
+    return jsonify(run_prediction(session["user_id"], features, source="simulated"))
 
 
 @app.route("/api/readings-history")
@@ -234,17 +282,74 @@ def api_readings_history():
     return jsonify({"readings": rows})
 
 
+# ---------- ESP32 device API ----------
+
+def lan_ip():
+    """Best guess at this machine's LAN address, for the ESP32 to POST to."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("10.255.255.255", 1))  # no packet is sent; just picks the outbound interface
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except OSError:
+        return "127.0.0.1"
+
+
+@app.route("/api/device/reading", methods=["POST"])
+def api_device_reading():
+    """Called by the ESP32 (no browser session). Auth = the per-user device token shown
+    on the dashboard, sent as the X-Device-Token header."""
+    data = request.get_json(force=True, silent=True) or {}
+    token = request.headers.get("X-Device-Token") or data.get("token")
+    device = db.get_device_by_token(token) if token else None
+    if not device:
+        return jsonify({"error": "Unknown or missing device token."}), 401
+    features, err = parse_features(data)
+    if err:
+        return jsonify({"error": err}), 400
+    db.touch_device(device["id"])
+    result = run_prediction(device["user_id"], features, source="esp32")
+    return jsonify({"ok": True, "condition": result["condition"], "confidence": result["confidence"],
+                    "healing_days": result["healing_days"]})
+
+
+@app.route("/api/device/status")
+@login_required
+def api_device_status():
+    device = db.get_or_create_device(session["user_id"])
+    latest = db.get_latest_reading(session["user_id"])
+    if latest and latest.get("source") == "esp32":
+        proba = condition_model.predict_proba(np.array([[latest[f] for f in FEATURES]]))[0]
+        latest["class_probs"] = {
+            label_encoder.inverse_transform([i])[0]: round(float(p), 3) for i, p in enumerate(proba)
+        }
+    port = request.host.split(":")[1] if ":" in request.host else "5000"
+    return jsonify({
+        "token": device["token"],
+        "last_seen": device["last_seen"],
+        "endpoint": f"http://{lan_ip()}:{port}/api/device/reading",
+        "latest": latest if latest and latest.get("source") == "esp32" else None,
+    })
+
+
+@app.route("/api/device/regenerate", methods=["POST"])
+@login_required
+def api_device_regenerate():
+    device = db.regenerate_device_token(session["user_id"])
+    return jsonify({"token": device["token"]})
+
+
 # ---------- chat API with Qdrant RAG ----------
 
 SYSTEM_PROMPT_TEMPLATE = """You are a calm, knowledgeable clinical wound-care assistant embedded in a smart-bandage \
 monitoring app. You are speaking directly to the patient in a warm, reassuring, and scientifically grounded tone.
 
 Current sensor reading from the smart bandage for this patient:
-- pH: {pH}
-- Temperature: {temperature} C
-- Humidity: {humidity}%
-- Exudate level: {exudate_level} / 10
-- Oxygen saturation: {oxygen_saturation}%
+- Body temperature: {temperature} C
+- Humidity under the dressing: {humidity}%
+- Heart rate: {heart_rate} bpm
+- Blood pressure: {systolic_bp}/{diastolic_bp} mmHg
 
 Machine Learning Model's current assessment:
 - Predicted wound condition: {condition} (confidence {confidence})
@@ -264,8 +369,8 @@ CLINICAL MEDICAL LITERATURE CONTEXT (Retrieved from Qdrant Vector Knowledge Base
 
 Clinical Guidelines & Response Rules:
 1. EVIDENCE-BASED GROUNDING: Answer the patient's question by directly incorporating and citing the relevant retrieved medical literature above.
-2. CITATION SYNTAX: Cite studies in brackets using the author tag provided (e.g. [Schneider et al., 2007], [Armstrong et al., 2007], [Winter, 1962], [Gethin et al., 2007], [Schultz et al., 2003]).
-3. SENSOR CORRELATION: Connect their specific sensor values (pH, Temperature, Humidity, Exudate, O2) to the clinical thresholds documented in the literature (e.g. explain why pH > 7.3 indicates alkaline bacterial environment, why temperature elevation ΔT > 1.1°C signals inflammation, or why maintaining 65-85% humidity promotes moist epithelization).
+2. CITATION SYNTAX: Cite only the studies listed above, in brackets, using exactly the author tag given for each (e.g. [Fierheller & Sibbald, 2010]). Never cite a study that is not in the list, and never invent numbers that the listed findings do not contain.
+3. SENSOR CORRELATION: Connect their specific values (temperature, humidity, heart rate, blood pressure) to the thresholds in the retrieved literature -- e.g. SIRS criteria (temperature > 38 or < 36 C, heart rate > 90), the qSOFA systolic BP <= 100 mmHg criterion, moist-wound-healing evidence for humidity, or the link between hypertension and slower wound healing.
 4. SAFETY: Never claim to provide a definitive diagnosis or replace their physician. If condition is 'infected' or values are abnormal, clearly advise prompt clinician review.
 5. FORMATTING: Use clean markdown, concise bullet points where appropriate, and keep the explanation easy for a patient or review judge to read.
 """
@@ -298,13 +403,7 @@ def api_chat():
             trend = f"stable (still {recent[0]['condition']})"
 
     # Retrieve relevant clinical literature via Qdrant Vector RAG
-    sensor_dict = {
-        "pH": latest["ph"] if latest else None,
-        "temperature": latest["temperature"] if latest else None,
-        "humidity": latest["humidity"] if latest else None,
-        "exudate_level": latest["exudate_level"] if latest else None,
-        "oxygen_saturation": latest["oxygen_saturation"] if latest else None,
-    }
+    sensor_dict = {f: (latest[f] if latest else None) for f in FEATURES}
     rag_data = rag_service.build_rag_context_for_chat(
         user_message,
         sensor_readings=sensor_dict,
@@ -313,11 +412,11 @@ def api_chat():
     clinical_literature = rag_data["prompt_text"] or "No specific matching literature excerpt found for this query."
 
     context = {
-        "pH": round(latest["ph"], 2) if latest else "unknown",
         "temperature": round(latest["temperature"], 1) if latest else "unknown",
         "humidity": round(latest["humidity"], 1) if latest else "unknown",
-        "exudate_level": round(latest["exudate_level"], 1) if latest else "unknown",
-        "oxygen_saturation": round(latest["oxygen_saturation"], 1) if latest else "unknown",
+        "heart_rate": round(latest["heart_rate"]) if latest else "unknown",
+        "systolic_bp": round(latest["systolic_bp"]) if latest else "unknown",
+        "diastolic_bp": round(latest["diastolic_bp"]) if latest else "unknown",
         "condition": latest["condition"] if latest else "no reading yet",
         "confidence": round(latest["confidence"], 2) if latest else "n/a",
         "healing_days": round(latest["healing_days"], 1) if latest else "n/a",
@@ -428,7 +527,15 @@ def api_model_metrics():
     # re-read from disk each time so a fresh `python models/train_model.py` run
     # shows up immediately without restarting the Flask server
     fresh_meta = json.loads((ROOT / "models" / "metadata.json").read_text())
+    ext = ROOT / "models" / "external_validation.json"
+    fresh_meta["external_validation"] = json.loads(ext.read_text()) if ext.exists() else None
     return jsonify(fresh_meta)
+
+
+@app.route("/model-outputs/<path:filename>")
+@login_required
+def model_output_file(filename):
+    return send_from_directory(ROOT / "model_outputs", filename)
 
 
 @app.route("/api/wound-context", methods=["POST"])
@@ -448,4 +555,10 @@ def api_save_wound_context():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    # 0.0.0.0 so an ESP32 on the same Wi-Fi can reach the server; set HOST=127.0.0.1 to
+    # keep it local. Debug mode is opt-in (FLASK_DEBUG=1) because the server is on the LAN.
+    app.run(
+        host=os.environ.get("HOST", "0.0.0.0"),
+        port=int(os.environ.get("PORT", 5000)),
+        debug=os.environ.get("FLASK_DEBUG") == "1",
+    )

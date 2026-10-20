@@ -1,9 +1,10 @@
 """Knowledge Graph Builder and Query Engine for Smart Bandage Medical Literature.
 Uses NetworkX to construct an interconnected clinical graph connecting:
 - Papers (Peer-reviewed literature)
-- Biomarkers / Sensors (pH, Temperature, Humidity, Exudate, Oxygen Saturation)
-- Clinical States (Healthy, Healing, Infected, Biofilm, Ischemia, Maceration, Desiccation)
-- Clinical Interventions (Antimicrobials, Debridement, Moisture Dressing, Oxygen, Offloading)
+- Biomarkers / Sensors (Temperature, Humidity, Heart Rate, Blood Pressure)
+- Clinical States (Healthy, Healing, Local Infection, Systemic Infection, Delayed Healing,
+  Maceration, Desiccation)
+- Clinical Interventions (Clinician review, Antibiotics, Dressings, Offloading, BP control, ...)
 
 Also computes graph metrics (Degree Centrality, PageRank) and serializes
 data for browser-based interactive force-directed visualization.
@@ -82,24 +83,20 @@ class WoundKnowledgeGraph:
                     )
 
         # 4. Add Biomarker -> Clinical State (INDICATES) edges with clinical thresholds
+        # Thresholds come from the papers in data/literature_data.py (source in brackets)
         sensor_to_state_links = [
-            ("pH", "infected", "pH > 7.3 (Alkaline shift / Biofilm)"),
-            ("pH", "wound_healing", "pH 5.5 - 6.8 (Acid mantle restoration)"),
-            ("pH", "healthy", "pH 4.0 - 6.0 (Intact barrier)"),
-            ("pH", "biofilm_formation", "pH 7.6 - 8.8 (Ammonia production)"),
-            ("temperature", "infected", "ΔT > 1.1°C or Temp > 35.5°C (Infection hyperthermia)"),
-            ("temperature", "wound_healing", "Temp 31.5 - 34.5°C (Normothermic granulation)"),
-            ("temperature", "tissue_ischemia", "Temp < 31.0°C (Hypothermic hypoperfusion)"),
-            ("humidity", "wound_healing", "Humidity 65 - 85% (Optimal moist bed)"),
-            ("humidity", "wound_desiccation", "Humidity < 45% (Desiccation crust)"),
-            ("humidity", "periwound_maceration", "Humidity > 88% (Exudate maceration)"),
-            ("exudate_level", "infected", "Exudate > 6.0 / 10 (Copious purulent drainage)"),
-            ("exudate_level", "biofilm_formation", "Exudate > 5.5 / 10 (High MMP-2/9 proteases)"),
-            ("exudate_level", "periwound_maceration", "Exudate > 6.5 / 10 (Enzymatic skin breakdown)"),
-            ("exudate_level", "wound_healing", "Exudate 2.0 - 4.5 / 10 (Balanced serous fluid)"),
-            ("oxygen_saturation", "tissue_ischemia", "StO2 < 50% (Critical tissue hypoxia)"),
-            ("oxygen_saturation", "wound_healing", "StO2 70 - 95% (Robust microvascular perfusion)"),
-            ("oxygen_saturation", "infected", "StO2 < 58% (Impaired neutrophil oxidative burst)"),
+            ("temperature", "systemic_infection", "Temp > 38 or < 36 °C (SIRS) [Bone 1992]"),
+            ("temperature", "infected", "Local wound heat vs control site [Fierheller 2010]"),
+            ("temperature", "delayed_healing", "Wound warmer than periwound skin, RR 2.25 [Nakagami 2010]"),
+            ("temperature", "wound_healing", "Wound bed ≥ 33 °C for cell activity [McGuiness 2004]"),
+            ("humidity", "wound_healing", "Moist wound bed epithelizes faster [Winter 1962]"),
+            ("humidity", "wound_desiccation", "Dry bed forms scab, slows closure [Junker 2013]"),
+            ("humidity", "periwound_maceration", "Prolonged saturation macerates skin [Cutting 2002]"),
+            ("humidity", "infected", "Increased exudate with bacterial burden [Woo 2009]"),
+            ("heart_rate", "systemic_infection", "HR > 90 bpm (SIRS) [Bone 1992]"),
+            ("heart_rate", "delayed_healing", "Stress response slows repair [Gouin 2011]"),
+            ("blood_pressure", "systemic_infection", "Systolic ≤ 100 mmHg (qSOFA) [Singer 2016]"),
+            ("blood_pressure", "delayed_healing", "Hypertension: 3.8 vs 2.0 days to dry wound [Ahmed 2011]"),
         ]
 
         for bio_key, state_key, rule_label in sensor_to_state_links:
@@ -134,6 +131,7 @@ class WoundKnowledgeGraph:
                 journal=paper["journal"],
                 doi=paper["doi"],
                 pmid=paper.get("pmid", ""),
+                pubmed_url=paper.get("pubmed_url", ""),
                 abstract=paper["abstract"],
                 key_findings=paper["key_findings"],
                 biomarkers=paper["biomarkers"],
@@ -148,7 +146,7 @@ class WoundKnowledgeGraph:
                         paper_node_id,
                         bio_node_id,
                         relation="INVESTIGATES",
-                        label=f"Investigates {bio.upper()}",
+                        label=f"Investigates {bio.replace('_', ' ')}",
                     )
 
             # Paper -[:EVIDENCES]-> Clinical Condition

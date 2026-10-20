@@ -1,3 +1,4 @@
+import secrets
 import sqlite3
 from pathlib import Path
 from datetime import datetime
@@ -26,10 +27,20 @@ def init_db():
         CREATE TABLE IF NOT EXISTS readings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
-            ph REAL, temperature REAL, humidity REAL,
-            exudate_level REAL, oxygen_saturation REAL,
+            temperature REAL, humidity REAL,
+            heart_rate REAL, systolic_bp REAL, diastolic_bp REAL,
+            source TEXT DEFAULT 'simulated',
             condition TEXT, confidence REAL, healing_days REAL,
             created_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        );
+
+        CREATE TABLE IF NOT EXISTS devices (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER UNIQUE NOT NULL,
+            token TEXT UNIQUE NOT NULL,
+            created_at TEXT NOT NULL,
+            last_seen TEXT,
             FOREIGN KEY (user_id) REFERENCES users (id)
         );
 
@@ -56,20 +67,26 @@ def init_db():
         );
         """
     )
+    # Databases created before the sensor change (pH / exudate / SpO2) lack these columns.
+    existing = {r["name"] for r in conn.execute("PRAGMA table_info(readings)")}
+    for col, decl in [("heart_rate", "REAL"), ("systolic_bp", "REAL"), ("diastolic_bp", "REAL"),
+                      ("source", "TEXT DEFAULT 'simulated'")]:
+        if col not in existing:
+            conn.execute(f"ALTER TABLE readings ADD COLUMN {col} {decl}")
     conn.commit()
     conn.close()
 
 
-def save_reading(user_id, features, condition, confidence, healing_days):
+def save_reading(user_id, features, condition, confidence, healing_days, source="simulated"):
     conn = get_db()
     conn.execute(
         """INSERT INTO readings
-           (user_id, ph, temperature, humidity, exudate_level, oxygen_saturation,
-            condition, confidence, healing_days, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           (user_id, temperature, humidity, heart_rate, systolic_bp, diastolic_bp,
+            source, condition, confidence, healing_days, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
-            user_id, features["pH"], features["temperature"], features["humidity"],
-            features["exudate_level"], features["oxygen_saturation"],
+            user_id, features["temperature"], features["humidity"], features["heart_rate"],
+            features["systolic_bp"], features["diastolic_bp"], source,
             condition, confidence, healing_days, datetime.utcnow().isoformat(),
         ),
     )
@@ -77,10 +94,14 @@ def save_reading(user_id, features, condition, confidence, healing_days):
     conn.close()
 
 
+# Readings saved before the sensor change have no heart_rate / BP; skip them everywhere.
+_CURRENT = "heart_rate IS NOT NULL"
+
+
 def get_latest_reading(user_id):
     conn = get_db()
     row = conn.execute(
-        "SELECT * FROM readings WHERE user_id = ? ORDER BY id DESC LIMIT 1",
+        f"SELECT * FROM readings WHERE user_id = ? AND {_CURRENT} ORDER BY id DESC LIMIT 1",
         (user_id,),
     ).fetchone()
     conn.close()
@@ -90,7 +111,7 @@ def get_latest_reading(user_id):
 def get_reading_history(user_id, limit=8):
     conn = get_db()
     rows = conn.execute(
-        "SELECT * FROM readings WHERE user_id = ? ORDER BY id DESC LIMIT ?",
+        f"SELECT * FROM readings WHERE user_id = ? AND {_CURRENT} ORDER BY id DESC LIMIT ?",
         (user_id, limit),
     ).fetchall()
     conn.close()
@@ -100,7 +121,7 @@ def get_reading_history(user_id, limit=8):
 def get_reading_count(user_id):
     conn = get_db()
     row = conn.execute(
-        "SELECT COUNT(*) as c FROM readings WHERE user_id = ?", (user_id,)
+        f"SELECT COUNT(*) as c FROM readings WHERE user_id = ? AND {_CURRENT}", (user_id,)
     ).fetchone()
     conn.close()
     return row["c"] if row else 0
@@ -157,3 +178,45 @@ def get_wound_context_history(user_id, limit=6):
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+# ---------- ESP32 device pairing ----------
+
+def get_or_create_device(user_id):
+    conn = get_db()
+    row = conn.execute("SELECT * FROM devices WHERE user_id = ?", (user_id,)).fetchone()
+    if not row:
+        conn.execute(
+            "INSERT INTO devices (user_id, token, created_at) VALUES (?, ?, ?)",
+            (user_id, secrets.token_urlsafe(18), datetime.utcnow().isoformat()),
+        )
+        conn.commit()
+        row = conn.execute("SELECT * FROM devices WHERE user_id = ?", (user_id,)).fetchone()
+    conn.close()
+    return dict(row)
+
+
+def regenerate_device_token(user_id):
+    get_or_create_device(user_id)
+    conn = get_db()
+    conn.execute(
+        "UPDATE devices SET token = ?, last_seen = NULL WHERE user_id = ?",
+        (secrets.token_urlsafe(18), user_id),
+    )
+    conn.commit()
+    conn.close()
+    return get_or_create_device(user_id)
+
+
+def get_device_by_token(token):
+    conn = get_db()
+    row = conn.execute("SELECT * FROM devices WHERE token = ?", (token,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def touch_device(device_id):
+    conn = get_db()
+    conn.execute("UPDATE devices SET last_seen = ? WHERE id = ?", (datetime.utcnow().isoformat(), device_id))
+    conn.commit()
+    conn.close()

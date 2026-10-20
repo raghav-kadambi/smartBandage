@@ -51,7 +51,7 @@ function formatMarkdown(text) {
   // Mainstream LLM-style source pills block at the bottom
   if (citations && citations.length > 0) {
     const pillsHtml = citations.map(c => {
-      const doiUrl = c.doi ? `https://doi.org/${encodeURIComponent(c.doi)}` : `/knowledge-graph`;
+      const doiUrl = c.pubmed_url || (c.doi ? `https://doi.org/${c.doi}` : `/knowledge-graph`);
       const firstAuthor = (c.authors || "").split(",")[0].trim();
       const authorShort = firstAuthor ? `${firstAuthor} et al. (${c.year})` : c.title;
       const journal = c.journal || "Medical Journal";

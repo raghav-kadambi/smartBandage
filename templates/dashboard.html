@@ -13,12 +13,16 @@
     <main class="main">
       <div class="page-header">
         <h1>Live sensor dashboard</h1>
-        <span class="meta" id="readingCountMeta">Demo mode — move the sliders to simulate bandage readings</span>
+        <span class="meta">
+          <span id="readingCountMeta">{{ 'Simulation mode — move the sliders to simulate bandage readings' if input_mode == 'simulate' else 'ESP32 mode — waiting for readings from the bandage' }}</span>
+          &nbsp;·&nbsp;<a class="mode-switch" href="{{ url_for('mode_page') }}">Switch input</a>
+        </span>
       </div>
 
       <div class="grid">
+        {% if input_mode == 'simulate' %}
         <div class="card">
-          <h2>Sensor inputs</h2>
+          <h2>Sensor inputs (simulated)</h2>
 
           <div class="preset-row">
             <button class="preset-btn healthy" data-preset="healthy"><span class="dot"></span>Healthy example</button>
@@ -28,6 +32,29 @@
 
           <div id="sliders"></div>
         </div>
+        {% else %}
+        <div class="card">
+          <h2>ESP32 bandage</h2>
+          <div id="deviceStatus" class="device-status offline"><span class="ic"></span><span id="deviceStatusText">Not connected yet</span></div>
+
+          <div class="device-field">
+            <div class="k">Server endpoint (set as SERVER_URL in the firmware)</div>
+            <div class="v-row"><code id="deviceEndpoint">—</code><button class="btn-sm" data-copy="deviceEndpoint">Copy</button></div>
+          </div>
+          <div class="device-field">
+            <div class="k">Device token (set as DEVICE_TOKEN — keep it private)</div>
+            <div class="v-row"><code id="deviceToken">—</code><button class="btn-sm" data-copy="deviceToken">Copy</button><button class="btn-sm" id="btnRegenToken">New token</button></div>
+          </div>
+
+          <div class="live-grid" id="liveTiles"></div>
+
+          <ol class="device-steps">
+            <li>Open <code>firmware/esp32_smart_bandage/esp32_smart_bandage.ino</code> in the Arduino IDE.</li>
+            <li>Fill in your Wi-Fi name and password, SERVER_URL and DEVICE_TOKEN from above.</li>
+            <li>Flash the ESP32 with this laptop on the same Wi-Fi. Readings appear here every few seconds.</li>
+          </ol>
+        </div>
+        {% endif %}
 
         <div class="card">
           <h2>Model prediction</h2>
@@ -47,23 +74,21 @@
           <div style="margin-top:16px;" id="probBars"></div>
 
           <div class="disclaimer">
-            
-            
-            
           </div>
         </div>
       </div>
 
       <div class="card" style="margin-top:22px;">
-        <h2>Recent readings <span style="color:var(--text-faint); font-weight:400;">(this session)</span></h2>
+        <h2>Recent readings</h2>
         <div id="historyTable">
-          <div style="color:var(--text-faint); font-size:12.5px;">No readings yet — move a slider to generate one.</div>
+          <div style="color:var(--text-faint); font-size:12.5px;">No readings yet.</div>
         </div>
       </div>
     </main>
   </div>
 
   <script id="slider-ranges-data" type="application/json">{{ slider_ranges | tojson }}</script>
+  <script id="input-mode-data" type="application/json">{{ input_mode | tojson }}</script>
   <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>

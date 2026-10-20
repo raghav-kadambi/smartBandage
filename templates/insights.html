@@ -19,6 +19,16 @@
       <div id="qualityBanner" class="quality-banner"></div>
 
       <div class="insights-grid">
+        <div class="card full">
+          <h2>Results at a glance</h2>
+          <div class="headline-grid">
+            <div><div class="metric-big" id="hlAcc">—</div><div class="metric-label">Classifier test accuracy (held-out split)</div></div>
+            <div><div class="metric-big" id="hlCv">—</div><div class="metric-label">5-fold cross-validation accuracy</div></div>
+            <div><div class="metric-big" id="hlR2">—</div><div class="metric-label">Regressor R² (held-out split)</div></div>
+            <div><div class="metric-big" id="hlExt">—</div><div class="metric-label" id="hlExtLabel">External AUROC on real ICU patients (PhysioNet 2019)</div></div>
+          </div>
+        </div>
+
         <div class="card">
           <h2>Training data composition</h2>
           <div id="dataComposition"></div>
@@ -29,18 +39,18 @@
           <div class="metric-pair">
             <div>
               <div class="metric-big" id="accAll">—</div>
-              <div class="metric-label">Accuracy (all held-out rows)</div>
+              <div class="metric-label">Accuracy (internal held-out split)</div>
             </div>
             <div>
               <div class="metric-big" id="accReal">—</div>
-              <div class="metric-label">Accuracy (real rows only)</div>
+              <div class="metric-label">5-fold cross-validation accuracy</div>
             </div>
           </div>
           <div id="perClassTable"></div>
         </div>
 
         <div class="card">
-          <h2>Confusion matrix (held-out set)</h2>
+          <h2>Confusion matrix (internal held-out split)</h2>
           <div id="confusionMatrix" style="overflow-x:auto;"></div>
         </div>
 
@@ -73,6 +83,13 @@
               <div id="featImportanceReg"></div>
             </div>
           </div>
+        </div>
+
+        <div class="card full" id="externalCard">
+          <h2>External validation: PhysioNet 2019 (official dataset, test only)</h2>
+          <div id="externalBody"><p class="validation-note">No external validation results yet. Run
+            <code>python validation/download_physionet2019.py</code> and then
+            <code>python validation/validate_physionet2019.py</code>.</p></div>
         </div>
       </div>
     </main>

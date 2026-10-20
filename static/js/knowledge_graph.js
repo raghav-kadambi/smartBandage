@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ${renderThresholds(node.thresholds)}
 
         <div class="insp-section">
-          <div class="insp-section-title">Clinical Abstract</div>
+          <div class="insp-section-title">Abstract (verbatim from PubMed)</div>
           <p class="insp-abstract">${escapeHtml(node.abstract || "No abstract available.")}</p>
         </div>
 
@@ -285,7 +285,8 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
 
         <div class="insp-actions">
-          ${node.doi ? `<a href="https://doi.org/${encodeURIComponent(node.doi)}" target="_blank" class="btn-insp btn-outline">View DOI ↗</a>` : ""}
+          ${node.pmid ? `<a href="https://pubmed.ncbi.nlm.nih.gov/${encodeURIComponent(node.pmid)}/" target="_blank" rel="noopener" class="btn-insp btn-outline">PubMed ${escapeHtml(node.pmid)} ↗</a>` : ""}
+          ${node.doi ? `<a href="https://doi.org/${node.doi}" target="_blank" rel="noopener" class="btn-insp btn-outline">DOI ↗</a>` : ""}
           <a href="/patient?q=${encodeURIComponent('What does the paper ' + (node.title || '') + ' say about my wound?')}" class="btn-insp btn-primary">Ask in RAG Chat 💬</a>
         </div>
       `;

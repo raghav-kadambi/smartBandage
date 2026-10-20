@@ -1,33 +1,33 @@
 {
-  "trained_at": "2026-09-08T19:18:48.229271+00:00",
+  "trained_at": "2026-10-20T07:15:48.149071+00:00",
   "data_source_file": "wound_data_train.csv",
   "features": [
-    "pH",
     "temperature",
     "humidity",
-    "exudate_level",
-    "oxygen_saturation"
+    "heart_rate",
+    "systolic_bp",
+    "diastolic_bp"
   ],
   "feature_ranges": {
-    "pH": [
-      4.0,
-      10.0
-    ],
     "temperature": [
-      25.0,
-      40.0
+      34.0,
+      42.0
     ],
     "humidity": [
       10.0,
       100.0
     ],
-    "exudate_level": [
-      0.0,
-      10.0
+    "heart_rate": [
+      35.0,
+      180.0
     ],
-    "oxygen_saturation": [
-      30.0,
-      100.0
+    "systolic_bp": [
+      70.0,
+      200.0
+    ],
+    "diastolic_bp": [
+      35.0,
+      120.0
     ]
   },
   "classes": [
@@ -36,67 +36,67 @@
     "wound_healing"
   ],
   "data_quality": {
-    "seed_rows_total": 20000,
-    "seed_class_distribution": {
-      "infected": 8055,
-      "healthy": 5986,
-      "wound_healing": 5959
-    },
-    "training_rows_total": 20000,
-    "training_rows_real": 20000,
-    "training_rows_synthetic": 0,
-    "synthetic_pct": 0.0,
+    "training_rows_total": 18000,
     "training_class_distribution": {
-      "infected": 8055,
-      "healthy": 5986,
-      "wound_healing": 5959
+      "healthy": 6000,
+      "wound_healing": 6000,
+      "infected": 6000
     },
-    "augmentation_method": "Per-class Gaussian (mean+covariance) fit to real rows, sampled and clipped to plausible sensor ranges, only topping classes up to 250 rows.",
-    "healing_days_source": "Heuristic severity score (distance from a healthy centroid), NOT learned from real patient outcomes -- no real healing-time dataset exists yet."
+    "training_data_source": "Knowledge-based: no public dataset records these signals from a wound dressing with healthy/healing/infected labels, so each class is sampled from distributions set by published criteria (SIRS, Sepsis-3/qSOFA, moist-healing and hypertension studies). See data/generate_training_data.py.",
+    "healing_days_source": "Heuristic severity score (fever, tachycardia, hypotension, hypertension, humidity away from the moist optimum), NOT learned from real patient outcomes.",
+    "external_test_set": "PhysioNet/CinC Challenge 2019 -- used for testing only, never for training."
   },
   "condition_model": {
     "algorithm": "RandomForestClassifier",
-    "accuracy_holdout_all": 0.991,
-    "accuracy_holdout_real_only": 0.991,
-    "real_only_test_n": 4000,
+    "params": {
+      "n_estimators": 300,
+      "max_depth": 12,
+      "min_samples_leaf": 5,
+      "random_state": 42
+    },
+    "accuracy_holdout": 0.929,
+    "macro_f1_holdout": 0.93,
+    "cv5_accuracy_mean": 0.929,
+    "cv5_accuracy_std": 0.003,
+    "holdout_n": 3600,
     "per_class": [
       {
         "class": "healthy",
-        "precision": 0.986,
-        "recall": 0.992,
-        "f1": 0.989,
-        "support": 1197
+        "precision": 0.959,
+        "recall": 0.917,
+        "f1": 0.937,
+        "support": 1200
       },
       {
         "class": "infected",
-        "precision": 0.996,
-        "recall": 0.997,
-        "f1": 0.997,
-        "support": 1611
+        "precision": 0.959,
+        "recall": 0.952,
+        "f1": 0.955,
+        "support": 1200
       },
       {
         "class": "wound_healing",
-        "precision": 0.987,
-        "recall": 0.981,
-        "f1": 0.984,
-        "support": 1192
+        "precision": 0.875,
+        "recall": 0.92,
+        "f1": 0.897,
+        "support": 1200
       }
     ],
     "confusion_matrix": [
       [
-        1187,
+        1100,
         0,
-        10
+        100
       ],
       [
         0,
-        1606,
-        5
+        1142,
+        58
       ],
       [
-        17,
-        6,
-        1169
+        47,
+        49,
+        1104
       ]
     ],
     "confusion_matrix_labels": [
@@ -105,23 +105,29 @@
       "wound_healing"
     ],
     "feature_importance": {
-      "pH": 0.014,
-      "temperature": 0.089,
-      "humidity": 0.121,
-      "exudate_level": 0.457,
-      "oxygen_saturation": 0.319
+      "temperature": 0.206,
+      "humidity": 0.611,
+      "heart_rate": 0.143,
+      "systolic_bp": 0.014,
+      "diastolic_bp": 0.027
     }
   },
   "healing_model": {
     "algorithm": "RandomForestRegressor",
-    "mae_days_holdout": 0.98,
-    "r2_holdout": 0.985,
+    "params": {
+      "n_estimators": 300,
+      "max_depth": 12,
+      "min_samples_leaf": 5,
+      "random_state": 42
+    },
+    "mae_days_holdout": 2.07,
+    "r2_holdout": 0.943,
     "feature_importance": {
-      "pH": 0.002,
-      "temperature": 0.003,
-      "humidity": 0.005,
-      "exudate_level": 0.115,
-      "oxygen_saturation": 0.874
+      "temperature": 0.134,
+      "humidity": 0.751,
+      "heart_rate": 0.097,
+      "systolic_bp": 0.013,
+      "diastolic_bp": 0.005
     }
   }
 }

@@ -4,6 +4,8 @@ and stores them in an embedded, file-persisted Qdrant database.
 Provides semantic retrieval to ground LLM patient/clinician conversations in peer-reviewed evidence.
 """
 
+import hashlib
+import json
 import os
 import pickle
 from pathlib import Path
@@ -42,15 +44,19 @@ class LiteratureRAGService:
         self.index_literature()
 
     def index_literature(self):
-        """Build chunks and index all papers into Qdrant (cached for instant startup)."""
+        """Build chunks and index all papers into Qdrant (cached for instant startup).
+        The cache is keyed on a hash of the corpus, so editing the papers rebuilds it."""
+        corpus_hash = hashlib.sha256(
+            json.dumps(PAPERS, sort_keys=True, default=str).encode("utf-8")
+        ).hexdigest()
         if CACHE_FILE.exists():
             try:
                 with open(CACHE_FILE, "rb") as f:
-                    cached_points = pickle.load(f)
-                if len(cached_points) == len(PAPERS):
+                    cached = pickle.load(f)
+                if isinstance(cached, dict) and cached.get("hash") == corpus_hash:
                     self.client.upsert(
                         collection_name=COLLECTION_NAME,
-                        points=cached_points,
+                        points=cached["points"],
                     )
                     return
             except Exception:
@@ -76,7 +82,7 @@ class LiteratureRAGService:
                 f"Clinical Conditions: {', '.join(paper.get('clinical_conditions', []))}. "
                 f"Clinical Thresholds: {threshold_summary}. "
                 f"Key Findings: {paper['key_findings']} "
-                f"Abstract: {paper['abstract']}"
+                f"PubMed Abstract: {paper['abstract']}"
             )
             texts_to_embed.append(chunk_text)
 
@@ -92,6 +98,8 @@ class LiteratureRAGService:
                 "journal": paper["journal"],
                 "doi": paper["doi"],
                 "pmid": paper.get("pmid", ""),
+                "pubmed_url": paper.get("pubmed_url", ""),
+                "doi_url": paper.get("doi_url", ""),
                 "biomarkers": paper["biomarkers"],
                 "clinical_conditions": paper.get("clinical_conditions", []),
                 "sensor_thresholds": paper.get("sensor_thresholds", {}),
@@ -110,7 +118,7 @@ class LiteratureRAGService:
         # Cache to disk for instant subsequent startups
         try:
             with open(CACHE_FILE, "wb") as f:
-                pickle.dump(points, f)
+                pickle.dump({"hash": corpus_hash, "points": points}, f)
         except Exception:
             pass
 
@@ -161,6 +169,8 @@ class LiteratureRAGService:
                 "journal": p.get("journal"),
                 "doi": p.get("doi"),
                 "pmid": p.get("pmid"),
+                "pubmed_url": p.get("pubmed_url"),
+                "doi_url": p.get("doi_url"),
                 "biomarkers": p.get("biomarkers", []),
                 "key_findings": p.get("key_findings"),
                 "abstract": p.get("abstract"),
@@ -183,25 +193,25 @@ class LiteratureRAGService:
         relevant_biomarker = None
 
         if sensor_readings:
-            ph = sensor_readings.get("pH")
             temp = sensor_readings.get("temperature")
             hum = sensor_readings.get("humidity")
-            exudate = sensor_readings.get("exudate_level")
-            o2 = sensor_readings.get("oxygen_saturation")
+            hr = sensor_readings.get("heart_rate")
+            sbp = sensor_readings.get("systolic_bp")
 
-            if ph is not None and float(ph) > 7.3:
-                query_terms.append(f"elevated alkaline wound pH {ph} infection biofilm")
-                relevant_biomarker = "pH"
-            if temp is not None and float(temp) > 35.0:
-                query_terms.append(f"elevated wound temperature {temp}C inflammation infection")
-            if exudate is not None and float(exudate) > 5.0:
-                query_terms.append(f"heavy wound exudate level {exudate} proteases MMPs")
-            if hum is not None and float(hum) > 85.0:
-                query_terms.append(f"high humidity {hum}% maceration moisture")
-            elif hum is not None and float(hum) < 50.0:
-                query_terms.append(f"low humidity {hum}% dry desiccation")
-            if o2 is not None and float(o2) < 65.0:
-                query_terms.append(f"low tissue oxygen saturation {o2}% ischemia hypoxia")
+            if temp is not None and float(temp) >= 38.0:
+                query_terms.append(f"fever temperature {temp}C wound infection systemic inflammatory response")
+            elif temp is not None and float(temp) < 36.0:
+                query_terms.append(f"hypothermia temperature {temp}C sepsis criteria")
+            if hr is not None and float(hr) > 90.0:
+                query_terms.append(f"tachycardia heart rate {hr} bpm SIRS sepsis infection")
+            if sbp is not None and float(sbp) <= 100.0:
+                query_terms.append(f"low systolic blood pressure {sbp} mmHg qSOFA sepsis")
+            elif sbp is not None and float(sbp) >= 140.0:
+                query_terms.append(f"hypertension systolic {sbp} mmHg delayed wound healing")
+            if hum is not None and float(hum) > 90.0:
+                query_terms.append(f"high humidity {hum}% moisture maceration")
+            elif hum is not None and float(hum) < 40.0:
+                query_terms.append(f"low humidity {hum}% dry wound scab epithelization")
 
         full_search_query = " ".join(query_terms)
         papers = self.search(full_search_query, limit=limit)
@@ -215,8 +225,10 @@ class LiteratureRAGService:
         citations_for_ui = []
 
         for p in papers:
-            author_short = p['authors'].split(',')[0].split()[0]
-            citation_tag = f"[{author_short} et al., {p['year']}]"
+            authors = [a for a in p["authors"].split(",") if a.strip()]
+            author_short = authors[0].split()[0].capitalize() if authors else "Anon"
+            etal = " et al." if len(authors) > 2 else (f" & {authors[1].split()[0].capitalize()}" if len(authors) == 2 else "")
+            citation_tag = f"[{author_short}{etal}, {p['year']}]"
             citations_for_ui.append({
                 "tag": citation_tag,
                 "paper_id": p["paper_id"],
@@ -225,6 +237,9 @@ class LiteratureRAGService:
                 "year": p["year"],
                 "journal": p["journal"],
                 "doi": p["doi"],
+                "pmid": p["pmid"],
+                "pubmed_url": p["pubmed_url"],
+                "doi_url": p["doi_url"],
                 "score": p["score"],
                 "biomarkers": p["biomarkers"],
                 "key_findings": p["key_findings"],
@@ -235,10 +250,10 @@ class LiteratureRAGService:
                 threshold_desc = f"Sensor Rules / Thresholds: {p['sensor_thresholds']}"
 
             context_lines.append(
-                f"- Paper {citation_tag}: '{p['title']}' ({p['journal']} {p['year']})\n"
+                f"- Paper {citation_tag}: '{p['title']}' ({p['journal']} {p['year']}, PMID {p['pmid']})\n"
                 f"  Findings: {p['key_findings']}\n"
                 f"  {threshold_desc}\n"
-                f"  Abstract excerpt: {p['abstract'][:250]}..."
+                f"  Abstract excerpt (PubMed): {p['abstract'][:600]}..."
             )
 
         formatted_context = "\n\n".join(context_lines)

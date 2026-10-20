@@ -25,11 +25,10 @@
         <div class="context-strip">
           {% if latest %}
           <span class="context-chip">Condition: <strong>{{ latest.condition }}</strong></span>
-          <span class="context-chip">pH: <strong>{{ "%.2f"|format(latest.ph) }}</strong></span>
           <span class="context-chip">Temp: <strong>{{ "%.1f"|format(latest.temperature) }}°C</strong></span>
           <span class="context-chip">Humidity: <strong>{{ "%.0f"|format(latest.humidity) }}%</strong></span>
-          <span class="context-chip">Exudate: <strong>{{ "%.1f"|format(latest.exudate_level) }}</strong></span>
-          <span class="context-chip">O2 sat: <strong>{{ "%.0f"|format(latest.oxygen_saturation) }}%</strong></span>
+          <span class="context-chip">Heart rate: <strong>{{ "%.0f"|format(latest.heart_rate) }} bpm</strong></span>
+          <span class="context-chip">BP: <strong>{{ "%.0f"|format(latest.systolic_bp) }}/{{ "%.0f"|format(latest.diastolic_bp) }}</strong></span>
           <span class="context-chip">Est. healing: <strong>{{ "%.1f"|format(latest.healing_days) }} days</strong></span>
           {% else %}
           <span class="context-chip">No sensor reading yet — visit the Dashboard first.</span>
@@ -54,10 +53,10 @@
           </div>
           {% if not history %}
           <div class="suggested-row" id="suggestedRow">
-            <button class="suggested-chip">Why is my pH alkaline and what literature explains this?</button>
+            <button class="suggested-chip">Does my temperature and heart rate suggest an infection?</button>
             <button class="suggested-chip">What clinical thresholds indicate wound infection?</button>
-            <button class="suggested-chip">How does moisture and humidity accelerate epithelization?</button>
-            <button class="suggested-chip">What role does oxygen saturation play in wound healing?</button>
+            <button class="suggested-chip">Why does keeping the wound moist help it heal?</button>
+            <button class="suggested-chip">Can high blood pressure slow down wound healing?</button>
           </div>
           {% endif %}
           <div class="chat-input-bar">

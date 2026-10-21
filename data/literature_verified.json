@@ -1,0 +1,336 @@
+[
+ {
+  "id": "fierheller_2010",
+  "title": "A clinical investigation into the relationship between increased periwound skin temperature and local wound infection in patients with chronic leg ulcers.",
+  "authors": "Fierheller M, Sibbald RG",
+  "year": 2010,
+  "journal": "Advances in skin & wound care",
+  "doi": "10.1097/01.ASW.0000383197.28192.98",
+  "pmid": "20631603",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/20631603/",
+  "evidence": "Cross-sectional pilot study (20 without wounds, 40 with chronic leg ulcers)",
+  "sensors": [
+   "temperature"
+  ],
+  "key_findings": "Increased periwound skin temperature, measured as the difference from an equivalent contralateral site with a handheld infrared thermometer, was significantly related to wound infection (F = 44.238, P < .001). The thermometer was reliable (test-retest r = 0.939). The authors note that evidence in this area is very limited and that results may not transfer beyond chronic leg ulcers.",
+  "abstract": "Increased local temperature is a classic sign of wound infection, and its quantitative measurement has the potential to assist with assessment and diagnosis of chronic deep wound and surrounding skin infection at the bedside. Evidence supporting such use in chronic wound care is very limited. This clinical pilot study was conducted in an attempt to quantify the relationship between increased periwound skin temperature and wound infection, as well as validate use of a handheld infrared thermometer for the wound care practitioner. Using a cross-sectional design, 2 groups of participants were recruited from a chronic wound clinic: without wounds (n = 20) and with chronic leg ulcers (n = 40). Participant and wound characteristics were documented. All skin temperatures were documented using a handheld infrared thermometer under consistent environmental conditions within the clinic. Data analysis was based on the difference (Delta) in skin temperature (in degrees Fahrenheit) between a target or wound site and an equivalent contralateral control site. Wound infection was identified using the combination of a validated assessment tool and clinical judgment. Supplemental semiquantitative bacterial swabs were collected from all wounds. Descriptive statistics were analyzed using the chi-squared calculation. A Pearson r calculation of test-retest skin temperature data collected from nonwounded participants initially determined reliability of the infrared thermometer. Correlation of increased periwound skin temperature to wound infection was determined by calculation of a 1-way analysis of variance. The infrared thermometer was found to be reliable (r = 0.939, P = .000 at a 95% confidence interval). A statistically significant relationship between increased periwound skin temperature and wound infection was identified (F = 44.238, P = .000 at a 95% confidence interval). Neither patient nor wound characteristics were significantly different between the participants with noninfected or infected wounds. The results of this study demonstrate that incorporating quantitative skin temperature measurement into routine wound assessment provides a timely and reliable method for a wound care practitioner to quantify the heat associated with deep and surrounding skin infection and to monitor ongoing wound status. Study limitations may reduce transferability of these findings to wound types other than chronic leg ulcers. Further research is needed to support and strengthen these results."
+ },
+ {
+  "id": "collins_2025",
+  "title": "Wound Bed Temperature has Potential to Indicate Infection Status: A Cross-Sectional Study.",
+  "authors": "Collins AR, O'Connor GM, Ryan DA, Parmeter M, Dinneen S, Gethin G",
+  "year": 2025,
+  "journal": "Wound repair and regeneration : official publication of the Wound Healing Society [and] the European Tissue Repair Society",
+  "doi": "10.1111/wrr.70072",
+  "pmid": "40748014",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/40748014/",
+  "evidence": "Cross-sectional study, 267 patients (diabetic foot, pressure, venous and arterial ulcers)",
+  "sensors": [
+   "temperature"
+  ],
+  "key_findings": "Wound-centre temperature correlated strongly with the whole-wound average (R2 = 0.977). The wound-to-periwound temperature difference showed only a fair correlation with the clinician's infection assessment (Pearson 0.32), so thermal imaging is proposed as a supplementary tool, not a standalone diagnostic.",
+  "abstract": "This study investigates the potential of wound bed temperature, measured using an IR camera, to aid in the clinical assessment of chronic wounds. The study captured thermal images from 267 patients with chronic wounds (diabetic foot ulcers, pressure ulcers, venous leg ulcers and arterial ulcers) with corresponding photographic images and clinical data. Temperature measurements were extracted from thermal images, focusing on both the centre of the wound and the surrounding periwound skin. Statistical analyses were employed to evaluate the relationship between wound temperature distribution and clinical diagnosis. The results showed a strong correlation between wound centre temperature and the average temperature across the entire wound (R2 = 0.977). This indicates that a single-point measurement is representative of the entire wound, simplifying wound temperature assessment. A fair correlation was found between the temperature difference between the wound and periwound and the clinician's assessment of infection status (Pearson coefficient = 0.32). The study concludes that thermal imaging holds promise as a supplementary tool for clinicians in assessing chronic wound status, especially in cases where infection is unclear. It is a low-cost, non-contact, and easy-to-use technique."
+ },
+ {
+  "id": "mufti_2018",
+  "title": "Infrared Skin Thermometry: Validating and Comparing Techniques to Detect Periwound Skin Infection.",
+  "authors": "Mufti A, Somayaji R, Coutts P, Sibbald RG",
+  "year": 2018,
+  "journal": "Advances in skin & wound care",
+  "doi": "10.1097/01.ASW.0000527352.75716.70",
+  "pmid": "29240589",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/29240589/",
+  "evidence": "Prospective cohort, 100 patients with open wounds",
+  "sensors": [
+   "temperature"
+  ],
+  "key_findings": "Four low-cost non-contact infrared thermometers detected clinically meaningful periwound temperature differences (defined as 3 F or 4 F versus a contralateral control site) equally well, using either a 4-point or whole-wound technique. The study compared devices and was not designed to establish an infection threshold.",
+  "abstract": "Diagnosis of wound infection can be challenging because it relies on a combination of clinical signs and symptoms that are often nonspecific. Increased periwound cutaneous temperature is a classic sign of deep and surrounding wound infection, and its quantitative measurement is one of the most reliable and valid clinical signs of deep and surrounding skin infection at the bedside. Skin surface temperature differences may be detected using commercially available noncontact infrared thermometers. However, techniques to detect temperature using noncontact infrared thermometers vary, and no studies have evaluated these methods. Two such measurement techniques include the \"4-point\" and \"whole-wound\" scanning methods. This study assessed the ability of different infrared thermometers using the aforementioned techniques to detect clinically meaningful differences in periwound cutaneous temperatures used in the diagnosis of wound infection. A prospective cohort study was conducted from 2015 to 2016 of consenting adult patients 18 years or older with an open wound attending a regional wound care clinic. One hundred patients with wounds underwent surface temperature measurement. Infection was not a specific inclusion criterion as the primary objective was to conduct a comparative assessment of infrared thermometry devices. Demographic data (age, height, weight, gender, and ethnicity) were also collected. Each wound was measured using 4 different noncontact infrared thermometers: Exergen DermaTemp 1001 (Exergen Corporation, Watertown, Massachusetts), Mastercraft Digital Temperature Reader (Mastercraft, Toronto, Ontario, Canada), Mastercool MSC52224-A (Mastercool Inc, Randolph, New Jersey), and Etekcity ETC-8250 Temperature Heat Pen (Etekcity, Anaheim, California). Data analysis was based on a comparison of 4 periwound skin surface temperature measurement differences (ΔT in degrees Fahrenheit) between the wound site and an equivalent contralateral control site. The primary outcome of the ability of each thermometer to detect a clinically significant difference in temperature was assessed with χ analysis. Paired t tests were conducted to compare the ΔT measurements of each specific thermometry device between the 2 measurement techniques. Pearson product moment correlation coefficients were calculated for the temperature ΔT for both measuring techniques for all devices to determine level of agreement. A 1-way analysis of variance was conducted to compare temperature measurements among the infrared thermometry devices. There was no significant difference in the ability of each thermometer to detect a clinically meaningful difference of 3° F by either the 4-point (P = .10) or whole-wound techniques (P = .67). When a definition of 4° F was used, results were similar (4-point, P = .15; whole wound, P = .20). Comparisons among devices and techniques showed strong correlations (>0.80). Etekcity ETC-8250 and the 4-point measurement compared with the Exergen device using the whole-wound technique had a correlation coefficient of 0.72. Spearman ρ demonstrated a similarly high degree of correlation between techniques and devices, and only the Etekcity ETC-8250 device had a coefficient of 0.71 to 0.90 when compared with others. Paired t testing for each thermometry device comparing measurement techniques for raw temperatures ΔT demonstrated no significant difference (P > .05). No statistical differences among the ΔT values for the 3 different thermometers were noted when using the whole-wound method (P = .095). Similarly, no significant differences among the ΔT values were noted for the 4 different thermometers when using the 4-point method (P = .10). The results of this study demonstrate that both the 4-point and whole-wound methods of temperature acquisition using cost-efficient infrared thermometers provide accurate and similar results in clinical wound care settings."
+ },
+ {
+  "id": "armstrong_2007",
+  "title": "Skin temperature monitoring reduces the risk for diabetic foot ulceration in high-risk patients.",
+  "authors": "Armstrong DG, Holtz-Neiderer K, Wendel C, Mohler MJ, Kimbriel HR, Lavery LA",
+  "year": 2007,
+  "journal": "The American journal of medicine",
+  "doi": "10.1016/j.amjmed.2007.06.028",
+  "pmid": "18060924",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/18060924/",
+  "evidence": "Randomised controlled trial, 225 high-risk diabetic patients, 18 months",
+  "sensors": [
+   "temperature"
+  ],
+  "key_findings": "Patients who self-measured foot skin temperature twice daily and reduced activity when a left-right difference exceeded 4 F had fewer foot ulcers (4.7% vs 12.2%, odds ratio 3.0, P = .038). Ulcerating sites showed a much larger temperature difference in the week before ulceration (3.50 vs 0.74). This concerns prevention of diabetic foot ulcers, not healing of existing wounds.",
+  "abstract": "To evaluate the effectiveness of home temperature monitoring to reduce the incidence of foot ulcers in high-risk patients with diabetes. In this physician-blinded, 18-month randomized controlled trial, 225 subjects with diabetes at high risk for ulceration were assigned to standard therapy (Standard Therapy Group) or dermal thermometry (Dermal Thermometry Group) groups. Both groups received therapeutic footwear, diabetic foot education, regular foot care, and performed a structured foot inspection daily. Dermal Thermometry Group subjects used an infrared skin thermometer to measure temperatures on 6 foot sites twice daily. Temperature differences >4 degrees F between left and right corresponding sites triggered patients to contact the study nurse and reduce activity until temperatures normalized. A total of 8.4% (n=19) subjects ulcerated over the study period. Subjects were one third as likely to ulcerate in the Dermal Thermometry Group compared with the Standard Therapy Group (12.2% vs 4.7%, odds ratio 3.0, 95% confidence interval, 1.0 to 8.5, P=.038). Proportional hazards regression analysis suggested that thermometry intervention was associated with a significantly longer time to ulceration (P=.04), adjusted for elevated foot ulcer classification (International Working Group Risk Factor 3), age, and minority status. Patients that ulcerated had a temperature difference that was 4.8 times greater at the site of ulceration in the week before ulceration than did a random 7 consecutive-day sample of 50 other subjects that did not ulcerate (3.50+/-1.0 vs 0.74+/-0.05, P=.001). High temperature gradients between feet may predict the onset of neuropathic ulceration and self-monitoring may reduce the risk of ulceration."
+ },
+ {
+  "id": "nakagami_2010",
+  "title": "Predicting delayed pressure ulcer healing using thermography: a prospective cohort study.",
+  "authors": "Nakagami G, Sanada H, Iizaka S, Kadono T, Higashino T, Koyanagi H, et al.",
+  "year": 2010,
+  "journal": "Journal of wound care",
+  "doi": "10.12968/jowc.2010.19.11.79695",
+  "pmid": "21135794",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/21135794/",
+  "evidence": "Prospective cohort, 35 patients with stage II-IV pressure ulcers",
+  "sensors": [
+   "temperature"
+  ],
+  "key_findings": "Pressure ulcers whose wound site was warmer than the periwound skin on thermography had a relative risk of delayed healing of 2.25 (95% CI 1.13-4.47) at 3 weeks. Sensitivity was 0.56 and specificity 0.82, so a warm wound is a moderate, not definitive, predictor.",
+  "abstract": "To investigate whether thermography can be used to detect latent inflammation in pressure ulcers and predict pressure ulcer prognosis in a clinical setting. For this cohort study, we recruited 35 patients with stage II-IV pressure ulcers on the torso, who underwent thermographic assessment on discovery of their pressure ulcer. The patients were followed up for at least 3 weeks. Thermography was performed immediately after dressing removal. Pressure ulcers were classified into two groups depending on whether or not the wound site temperature was lower or higher than the periwound skin: the low temperature group and the high temperature group respectively. A generalised estimation equation was used to estimate the relative risk of delayed healing of pressure ulcers, comparing wounds with high temperatures and low temperatures. Of the 35 patients, 21 had 'low temperature' wounds and 14 had 'high temperature' wounds at baseline. Two patients in the high temperature group presented with overt infection, and were excluded from further analysis. Twenty-two pressure ulcers were considered to heal 'normally' (that is, the wound area reduced by 30% or more within 3 weeks) and 16 did not heal. The baseline DESIGN score (a measure of gross wound status) did not differ in any subscales between the high and low temperature groups. The relative risk for delayed healing in high temperature cases was 2.25 (95% confidence intervals; 1.13-4.47, p=0.021). Sensitivity was 0.56, specificity was 0.82, positive predictive value was 0.75, and negative predictive value was 0.67. Our results indicate that using thermography to classify pressure ulcers according to temperature could be a useful predictor of healing at 3 weeks, even though wound appearances may not differ at the point of thermographical assessment. The higher temperature in the wound site, when compared with periwound skin, may imply the presence of critical colonisation, or other factors which disturb the wound healing."
+ },
+ {
+  "id": "derwin_2022",
+  "title": "The impact of topical agents and dressing on pH and temperature on wound healing: A systematic, narrative review.",
+  "authors": "Derwin R, Patton D, Avsar P, Strapp H, Moore Z",
+  "year": 2022,
+  "journal": "International wound journal",
+  "doi": "10.1111/iwj.13733",
+  "pmid": "34931445",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/34931445/",
+  "evidence": "Systematic narrative review (6 clinical studies, low quality)",
+  "sensors": [
+   "temperature",
+   "pH"
+  ],
+  "key_findings": "Only one of six eligible clinical studies examined temperature (topical sodium nitrite raised periwound skin temperature alongside smaller leg ulcers). Given low certainty of evidence, the authors could not recommend any agent or dressing to manipulate wound pH or temperature.",
+  "abstract": "To assess the impact of topical agents and dressings on surface wound pH, temperature, and subsequent wound healing. This was a systematic, narrative review of the literature, following the PRISMA (2020) guidelines. The databases searched were Medline PubMed, Cumulative Index to Nursing and Allied Health Literature (CINAHL), Cochrane Library, Embase, Web of Science, and Scopus. Data synthesis and analysis were conducted using a structured narrative synthesis. The quality of the included clinical studies was appraised using the Evidence-Based Literature (EBL) Critical Appraisal Tool. A total of six clinical studies were assessed as eligible for inclusion, A total of six dressings/topical agents were assessed and the types of wounds included non-healing chronic wounds. Of the studies, five explored pH and one explored temperature. The EBL validity of the clinical studies was low (mean quality score was 51.3%). The five clinical studies that explored pH investigated different dressings and topical agents reporting an associated reduction in pH and improved wound outcomes. One clinical study investigated the impact of topical sodium nitrite on temperature and found that sodium nitrite increased peri-wound skin temperature and improved wound outcomes with a reduction in leg ulcer size. Given the low certainty of the evidence, we cannot confidently recommend the use of any particular topical agent or dressing to manipulate pH, or temperature to improve wound outcomes. Thus, there is a need for further research to develop a greater understanding of this topic. Irish Research Council, Enterprise Partnership Scheme."
+ },
+ {
+  "id": "tang_2021",
+  "title": "Wearable Sensors and Systems for Wound Healing-Related pH and Temperature Detection.",
+  "authors": "Tang N, Zheng Y, Jiang X, Zhou C, Jin H, Jin K, et al.",
+  "year": 2021,
+  "journal": "Micromachines",
+  "doi": "10.3390/mi12040430",
+  "pmid": "33919752",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/33919752/",
+  "evidence": "Narrative review of wearable sensors",
+  "sensors": [
+   "temperature",
+   "pH"
+  ],
+  "key_findings": "States that wound pH and temperature have long been recognised as important biomarkers of healing status and reviews wearable sensing approaches. It highlights open challenges: sensing performance, defining an infection-identification threshold, large-area detection and long-term reliability.",
+  "abstract": "Wound healing is a complex tissue regeneration process involving many changes in multiple physiological parameters. The pH and temperature of a wound site have long been recognized as important biomarkers for assessing wound healing status. For effective wound management, wound dressings integrated with wearable sensors and systems used for continuous monitoring of pH and temperature have received much attention in recent years. Herein, recent advances in the development of wearable pH and temperature sensors and systems based on different sensing mechanisms for wound status monitoring and treatment are comprehensively summarized. Challenges in the areas of sensing performance, infection identification threshold, large-area 3-dimensional detection, and long-term reliable monitoring in current wearable sensors/systems and emerging solutions are emphasized, providing critical insights into the development of wearable sensors and systems for wound healing monitoring and management."
+ },
+ {
+  "id": "youssef_2023",
+  "title": "Recent advances in biosensors for real time monitoring of pH, temperature, and oxygen in chronic wounds.",
+  "authors": "Youssef K, Ullah A, Rezai P, Hasan A, Amirfazli A",
+  "year": 2023,
+  "journal": "Materials today. Bio",
+  "doi": "10.1016/j.mtbio.2023.100764",
+  "pmid": "37674780",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/37674780/",
+  "evidence": "Narrative review of smart-bandage biosensors",
+  "sensors": [
+   "temperature",
+   "pH",
+   "oxygen"
+  ],
+  "key_findings": "Reviews smart bandages that integrate pH, temperature and oxygen sensors to assess chronic wound infection in real time, with the aim of reducing dressing changes and enabling tailored therapy.",
+  "abstract": "Chronic wounds are among the major healthcare issues affecting millions of people worldwide with high rates of morbidity, losses of limbs and mortality. Microbial infection in wounds is a severe problem that can impede healing of chronic wounds. Accurate, timely and early detection of infections, and real time monitoring of various wound healing biomarkers related to infection can be significantly helpful in the treatment and care of chronic wounds. However, clinical methodologies of periodic assessment and care of wounds require physical visit to wound care clinics or hospitals and time-consuming frequent replacement of wound dressing patches, which also often adversely affect the healing process. Besides, frequent replacements of wound dressings are highly expensive, causing a huge amount of burden on the national health care systems. Smart bandages have emerged to provide in situ physiochemical surveillance in real time at the wound site. These bandages integrate smart sensors to detect the condition of wound infection based on various parameters, such as pH, temperature and oxygen level in the wound which reduces the frequency of changing the wound dressings and its associated complications. These devices can continually monitor the healing process, paving the way for tailored therapy and improved quality of patient's life. In this review, we present an overview of recent advances in biosensors for real time monitoring of pH, temperature, and oxygen in chronic wounds in order to assess infection status. We have elaborated the recent progress in quantitative monitoring of several biomarkers important for assessing wounds infection status and its detection using smart biosensors. The review shows that real-time monitoring of wound status by quantifying specific biomarkers, such as pH, temperature and tissue oxygenation to significantly aid the treatment and care of chronic infected wounds."
+ },
+ {
+  "id": "sarpong_2026",
+  "title": "Advancements in Smart Wound Dressings: Leveraging Sensor Technology for Real-Time Wound Monitoring and Management.",
+  "authors": "Sarpong C, Larson JM, Oh I, Devisetti N, Gupta S",
+  "year": 2026,
+  "journal": "Plastic surgery (Oakville, Ont.)",
+  "doi": "10.1177/22925503261440483",
+  "pmid": "42005091",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/42005091/",
+  "evidence": "Structured review of sensor-enabled dressings",
+  "sensors": [
+   "temperature",
+   "moisture",
+   "pH"
+  ],
+  "key_findings": "Reviews dressings measuring temperature, pH, moisture and infection-associated parameters. Concludes that clinical validation varies widely, many systems remain preclinical, and direct comparison with diagnostic standards and patient-centred outcome data are largely lacking.",
+  "abstract": "This review aims to evaluate smart wound dressings (SWDs) that integrate sensor technology for real-time monitoring of acute and chronic wounds, with emphasis on clinical relevance, validation status, and translational limitations. A structured literature search was performed to identify preclinical, translational, and human studies evaluating sensor-enabled wound dressings, including technologies measuring temperature, pH, moisture, and infection-associated parameters. Relevant studies were selected based on applicability to sensor-integrated wound monitoring. Key features extracted included sensing modality, validation model, regulatory context, and reported clinical applicability. Sensor-enabled wound dressings demonstrate promising noninvasive approaches to wound monitoring; however, the level of clinical validation varies widely. While some systems have advanced to limited human use supported by observational data, many remain at the preclinical or early feasibility stage. Direct comparisons with established diagnostic standards and robust patient-centered outcome data are largely lacking. SWDs represent a rapidly evolving field with significant potential to improve wound monitoring. Current clinical adoption is constrained by limited comparative validation and regulatory pathways that do not require demonstrated efficacy. Future studies benchmarking these technologies against accepted diagnostic standards will be essential to defining their clinical role. Cette revue a pour objectif d’évaluer les pansements intelligents intégrant des technologies de capteurs pour la surveillance en temps réel des plaies aiguës et chroniques, en mettant l’accent sur leur pertinence clinique, leur niveau de validation et les limites de leur transposition en pratique clinique. Une recherche bibliographique structurée a été menée afin d’identifier les études précliniques, translationnelles et cliniques portant sur des pansements intégrant des capteurs, incluant des technologies mesurant la température, le pH, l’humidité et des paramètres associés à l’infection. Les études pertinentes ont été sélectionnées en fonction de leur applicabilité à la surveillance des plaies à l’aide de dispositifs intégrant des capteurs. Les principales caractéristiques extraites comprenaient la modalité de détection, le modèle de validation, le cadre réglementaire et l’applicabilité clinique rapportée. Les pansements intégrant des capteurs offrent des approches non invasives prometteuses pour la surveillance des plaies ; toutefois, le niveau de validation clinique varie considérablement. Si certains systèmes ont atteint un stade d’utilisation humaine limitée, soutenue par des données observationnelles, un grand nombre demeure au stade préclinique ou à un stade précoce de faisabilité. Les comparaisons directes avec les standards diagnostiques établis ainsi que des données robustes centrées sur les résultats rapportés par les patients font largement défaut. Les pansements intelligents constituent un domaine en rapide évolution, présentant un potentiel important pour améliorer la surveillance des plaies. Leur adoption clinique actuelle est freinée par un manque de validation comparative et par des cadres réglementaires n’exigeant pas la démonstration d’une efficacité clinique. Des études futures comparant ces technologies aux standards diagnostiques reconnus seront essentielles pour préciser leur place en pratique clinique."
+ },
+ {
+  "id": "dai_2026",
+  "title": "A recent review on smart dressings for chronic wound management: from diagnosis to therapy.",
+  "authors": "Dai Z, Zhang Z, Rabita Z, Yan Y, Wu D, Zhu J",
+  "year": 2026,
+  "journal": "RSC advances",
+  "doi": "10.1039/d6ra04998b",
+  "pmid": "42643711",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/42643711/",
+  "evidence": "Narrative review of smart dressings",
+  "sensors": [
+   "temperature",
+   "moisture",
+   "exudate",
+   "pH"
+  ],
+  "key_findings": "Categorises smart dressings by function, including exudate management and real-time monitoring of microenvironment markers such as pH and temperature, and discusses integrated diagnosis-and-therapy systems and challenges for clinical translation.",
+  "abstract": "Chronic wounds remain a major clinical challenge nowadays due to persistent inflammation, impaired regeneration, and high infection risk. Conventional dressings offer limited functionality and lack real-time feedback, driving the need for smart dressing systems that integrate diagnosis with on-demand therapy. This review summarizes the recent advances in smart wound dressings for chronic wound management. Following a brief overview of wound healing pathophysiology and key influencing factors, smart dressings are categorized according to their core functions, including exudate management, real-time monitoring of microenvironmental biomarkers (e.g., pH and temperature), broad-spectrum antibacterial therapy and inflammation regulation, and their strategies are discussed. This review also introduces multiple stimuli-responsive drug delivery systems triggered by pH, enzymes, temperature, and glucose, with particular emphasis on integrated \"diagnosis-therapy\" platforms that enable closed-loop wound management. Finally, the current challenges and future perspectives for clinical translation are discussed, highlighting the need for multimodal, personalized, and cost-effective smart dressing systems."
+ },
+ {
+  "id": "junker_2013",
+  "title": "Clinical Impact Upon Wound Healing and Inflammation in Moist, Wet, and Dry Environments.",
+  "authors": "Junker JP, Kamel RA, Caterson EJ, Eriksson E",
+  "year": 2013,
+  "journal": "Advances in wound care",
+  "doi": "10.1089/wound.2012.0412",
+  "pmid": "24587972",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/24587972/",
+  "evidence": "Narrative review",
+  "sensors": [
+   "moisture",
+   "humidity"
+  ],
+  "key_findings": "Reports strong evidence that wounds treated in a moist or wet environment re-epithelialise better and scar less than wounds treated dry. A controlled wet environment also allows delivery of antimicrobials, analgesics, growth factors and cells.",
+  "abstract": "Successful treatment of wounds relies on precise control and continuous monitoring of the wound-healing process. Wet or moist treatment of wounds has been shown to promote re-epithelialization and result in reduced scar formation, as compared to treatment in a dry environment. By treating wounds in a controlled wet environment, delivery of antimicrobials, analgesics, other bioactive molecules such as growth factors, as well as cells and micrografts, is allowed. The addition of growth factors or transplantation of cells yields the possibility of creating a regenerative wound microenvironment that favors healing, as opposed to excessive scar formation. Although several manufacturers have conceived products implementing the concept of moist wound healing, there remains a lack of commercial translation of wet wound-healing principles into clinically available products. This can only be mitigated by further research on the topic. The strong evidence pointing to the favorable healing of wounds in a wet or moist environment compared to dry treatment will extend the clinical indications for this treatment. Further advances are required to elucidate by which means this microenvironment can be optimized to improve the healing outcome."
+ },
+ {
+  "id": "han_2017",
+  "title": "Chronic Wound Healing: A Review of Current Management and Treatments.",
+  "authors": "Han G, Ceilley R",
+  "year": 2017,
+  "journal": "Advances in therapy",
+  "doi": "10.1007/s12325-017-0478-y",
+  "pmid": "28108895",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/28108895/",
+  "evidence": "Narrative review",
+  "sensors": [
+   "moisture",
+   "exudate"
+  ],
+  "key_findings": "General review of wound-healing physiology and current management of chronic wounds, covering how dressings and treatments address barriers ranging from infection to hypoxia.",
+  "abstract": "Wound healing is a complex, highly regulated process that is critical in maintaining the barrier function of skin. With numerous disease processes, the cascade of events involved in wound healing can be affected, resulting in chronic, non-healing wounds that subject the patient to significant discomfort and distress while draining the medical system of an enormous amount of resources. The healing of a superficial wound requires many factors to work in concert, and wound dressings and treatments have evolved considerably to address possible barriers to wound healing, ranging from infection to hypoxia. Even optimally, wound tissue never reaches its pre-injured strength and multiple aberrant healing states can result in chronic non-healing wounds. This article will review wound healing physiology and discuss current approaches for treating a wound."
+ },
+ {
+  "id": "schultz_2003",
+  "title": "Wound bed preparation: a systematic approach to wound management.",
+  "authors": "Schultz GS, Sibbald RG, Falanga V, Ayello EA, Dowsett C, Harding K, et al.",
+  "year": 2003,
+  "journal": "Wound repair and regeneration : official publication of the Wound Healing Society [and] the European Tissue Repair Society",
+  "doi": "10.1046/j.1524-475x.11.s2.1.x",
+  "pmid": "12654015",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/12654015/",
+  "evidence": "Expert consensus article",
+  "sensors": [
+   "exudate",
+   "moisture"
+  ],
+  "key_findings": "Explains that chronic wounds differ from acute wounds because the orderly healing sequence becomes stuck, and introduces wound bed preparation as management to accelerate endogenous healing by identifying and removing barriers to healing.",
+  "abstract": "The healing process in acute wounds has been extensively studied and the knowledge derived from these studies has often been extrapolated to the care of chronic wounds, on the assumption that nonhealing chronic wounds were simply aberrations of the normal tissue repair process. However, this approach is less than satisfactory, as the chronic wound healing process differs in many important respects from that seen in acute wounds. In chronic wounds, the orderly sequence of events seen in acute wounds becomes disrupted or \"stuck\" at one or more of the different stages of wound healing. For the normal repair process to resume, the barrier to healing must be identified and removed through application of the correct techniques. It is important, therefore, to understand the molecular events that are involved in the wound healing process in order to select the most appropriate intervention. Wound bed preparation is the management of a wound in order to accelerate endogenous healing or to facilitate the effectiveness of other therapeutic measures. Experts in wound management consider that wound bed preparation is an important concept with significant potential as an educational tool in wound management. This article was developed after a meeting of wound healing experts in June 2002 and is intended to provide an overview of the current status, role, and key elements of wound bed preparation. Readers will be able to examine the following issues; the current status of wound bed preparation; an analysis of the acute and chronic wound environments; how wound healing can take place in these environments; the role of wound bed preparation in the clinic; the clinical and cellular components of the wound bed preparation concept; a detailed analysis of the components of wound bed preparation."
+ },
+ {
+  "id": "goto_2020",
+  "title": "Wound Pain and Wound Healing Biomarkers From Wound Exudate: A Scoping Review.",
+  "authors": "Goto T, Saligan LN",
+  "year": 2020,
+  "journal": "Journal of wound, ostomy, and continence nursing : official publication of The Wound, Ostomy and Continence Nurses Society",
+  "doi": "10.1097/WON.0000000000000703",
+  "pmid": "33201141",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/33201141/",
+  "evidence": "Scoping review (21 articles)",
+  "sensors": [
+   "exudate"
+  ],
+  "key_findings": "In wound exudate, the most frequently studied healing biomarkers were proteases including matrix metalloproteinases, and the most frequent pain biomarkers were proinflammatory cytokines. These are laboratory markers, not something a bandage moisture sensor measures.",
+  "abstract": "Effective management of wound pain is essential for optimal wound healing. Nevertheless, the outcomes of wound pain interventions are based on subjective measures, which can prove problematic in patients with cognitive impairment. Identification of biomarkers associated with wound pain and wound healing can be used to more objectively estimate wound pain and contribute to the development of precise management options to reduce wound pain and promote wound healing. This scoping review aimed to identify wound pain and wound healing biomarkers from wound exudates and to describe different wound collection methods to identify these biomarkers. We searched the literature (PROSPERO database registration number: CRD42018103843) via a scoping review. The PubMed database was searched for articles that explored relationships between cutaneous wound pain, wound healing, and biomolecules. Inclusion criteria were articles that reported original data, used adult human samples, and were published in English. Twenty-one articles were retrieved: 17 investigated molecules from wound exudate associated with wound healing status, and 4 reported molecules associated with wound pain. The most frequently observed wound pain biomarkers were proinflammatory cytokines; the most frequently observed wound healing biomarkers were proteases including those in the matrix metalloproteinase family. Six wound exudate collection methods were identified to extract potential wound pain and wound healing biomarkers from wound exudate. The results can guide future wound exudate research to validate these wound pain and wound healing biomarkers and to develop therapies targeting these biomarkers to reduce wound pain and promote wound healing."
+ },
+ {
+  "id": "guo_2010",
+  "title": "Factors affecting wound healing.",
+  "authors": "Guo S, Dipietro LA",
+  "year": 2010,
+  "journal": "Journal of dental research",
+  "doi": "10.1177/0022034509359125",
+  "pmid": "20139336",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/20139336/",
+  "evidence": "Narrative review",
+  "sensors": [
+   "heart_rate",
+   "blood_pressure"
+  ],
+  "key_findings": "Reviews systemic and local factors that impair healing: oxygenation, infection, age and sex hormones, stress, diabetes, obesity, medications, alcoholism, smoking and nutrition.",
+  "abstract": "Wound healing, as a normal biological process in the human body, is achieved through four precisely and highly programmed phases: hemostasis, inflammation, proliferation, and remodeling. For a wound to heal successfully, all four phases must occur in the proper sequence and time frame. Many factors can interfere with one or more phases of this process, thus causing improper or impaired wound healing. This article reviews the recent literature on the most significant factors that affect cutaneous wound healing and the potential cellular and/or molecular mechanisms involved. The factors discussed include oxygenation, infection, age and sex hormones, stress, diabetes, obesity, medications, alcoholism, smoking, and nutrition. A better understanding of the influence of these factors on repair may lead to therapeutics that improve wound healing and resolve impaired wounds."
+ },
+ {
+  "id": "liu_2024",
+  "title": "The impact of long-term antihypertensive treatment on wound healing after major non-cardiac surgery in patients with cardiovascular diseases: A meta-analysis.",
+  "authors": "Liu Y, Ma C, Tang X, Liu S, Jin Y",
+  "year": 2024,
+  "journal": "International wound journal",
+  "doi": "10.1111/iwj.14858",
+  "pmid": "38546006",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/38546006/",
+  "evidence": "Meta-analysis (7 studies, post-surgical wounds)",
+  "sensors": [
+   "blood_pressure"
+  ],
+  "key_findings": "Among patients undergoing major non-cardiac surgery, long-term antihypertensive treatment was associated with better postoperative wound-healing scores (REEDA) and less scarring. The evidence concerns surgical wounds and treated hypertension, not home blood-pressure readings and chronic wounds.",
+  "abstract": "Hypertension is a prevalent condition that poses significant challenges in the perioperative management of patients undergoing major non-cardiac surgery, particularly concerning wound healing and scar formation. This meta-analysis assesses the impact of long-term antihypertensive treatment on postoperative wound healing, examining data from seven studies involving patients who received such treatments compared to untreated controls. Our findings reveal that long-term antihypertensive therapy is associated with significantly improved wound healing outcomes, as indicated by lower REEDA scores (I2 = 96%, SMD = -25.71, 95% CI: [-33.71, -17.70], p < 0.01) 1 week post-surgery and reduced scar formation, demonstrated by lower Manchester Scar Scale scores (I2 = 93%, SMD = -37.29, 95% CI: [-44.93, -29.64], p < 0.01) 2 months post-surgery. These results underscore the potential benefits of antihypertensive treatment in enhancing surgical recovery and offer insights into optimising perioperative care for hypertensive patients."
+ },
+ {
+  "id": "wolny_2024",
+  "title": "Risk Factors for Non-Healing Wounds-A Single-Centre Study.",
+  "authors": "Wolny D, Štěpánek L, Horáková D, Thomas J, Zapletalová J, Patel MS",
+  "year": 2024,
+  "journal": "Journal of clinical medicine",
+  "doi": "10.3390/jcm13041003",
+  "pmid": "38398316",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/38398316/",
+  "evidence": "Single-centre cohort, 149 patients with non-healing wounds",
+  "sensors": [
+   "exudate",
+   "blood_pressure"
+  ],
+  "key_findings": "Non-healing outcomes were predicted by local factors (depth over 1 cm, wound secretion, inflammatory base, maximum wound size) and, among systemic factors, most strongly by clinically manifested atherosclerosis and its risk factors. Bacterial infection was the dominant risk factor for prolonged healing.",
+  "abstract": "Background: Chronic wounds present a significant clinical, social, and economic challenge. This study aimed to objectify the risk factors of healing outcomes and the duration of chronic wounds from various etiologies. Methods: Patients treated for non-healing wounds at the surgical outpatient clinic of the Olomouc Military Hospital were involved. Data from patients treated between 8/2021 and 9/2023 were selected. Patients were mostly treated as outpatients, with microbiological follow-up indicated in cases of advanced signs of inflammation. Results: There were 149 patients who met our selection criteria (the mean age was 64.4 years). Predominant causes of wounds involved diabetes (30.9%), post-trauma (25.5%), pressure ulcers (14.8%), surgical site infections (14.8%), and vascular ulcers (14.1%). Patient outcomes included wound resolution in 77.2% of patients (with a mean healing time of 110.9 days), amputation in 14.1%, and wound-related death in 8.7% of patients. Non-healing cases (amputation/death) were predicted by several local factors including an initial depth greater than 1 cm, wound secretion, inflammatory base, and a maximum wound size. Systemic factors included most strongly clinically manifested atherosclerosis and its risk factors. Of the 110 swabs performed, 103 identified at least 1 bacterial genus. The dominant risk factor for a prolonged healing duration was bacterial infection. Wounds contaminated by Proteus or Pseudomonas had prolonged healing times of 87 days (p = 0.02) and 72 days (p = 0.045), respectively. Conclusions: The early identification of local and systemic risk factors contributes to the successful resolution of chronic wounds and a reduced duration of healing."
+ },
+ {
+  "id": "razjouyan_2017",
+  "title": "Does Physiological Stress Slow Down Wound Healing in Patients With Diabetes?",
+  "authors": "Razjouyan J, Grewal GS, Talal TK, Armstrong DG, Mills JL, Najafi B",
+  "year": 2017,
+  "journal": "Journal of diabetes science and technology",
+  "doi": "10.1177/1932296817705397",
+  "pmid": "28436270",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/28436270/",
+  "evidence": "Cohort, 25 outpatients with diabetic foot ulcers",
+  "sensors": [
+   "heart_rate"
+  ],
+  "key_findings": "Heart-rate-variability measures of stress response and vagal tone, taken with a chest wearable before dressing, correlated with healing speed (|r| about 0.7) and separated slow from fast healers well (AUC > 0.90) in this small sample. Heart-rate variability is not the same as the average heart rate a watch shows.",
+  "abstract": "Poor healing is an important contributing factor to amputation among patients with diabetic foot ulcers (DFUs). Physiological stress may slow wound healing and increase susceptibility to infection. The objective was to examine the association between heart rate variability (HRV) as an indicator of physiological stress response and healing speed (HealSpeed) among outpatients with active DFUs. Ambulatory patients with diabetes with DFUs (n = 25, age: 59.3 ± 8.3 years) were recruited. HRV during pre-wound dressing was measured using a wearable sensor attached to participants' chest. HRVs were quantified in both time and frequency domains to assess physiological stress response and vagal tone (relaxation). Change in wound size between two consecutive visits was used to estimate HealSpeed. Participants were then categorized into slow healing and fast healing groups. Between the two groups, comparisons were performed for demographic, clinical, and HRV derived parameters. Associations between different descriptors of HRV and HealSpeed were also assessed. HealSpeed was significantly correlated with both vagal tone ( r = -.705, P = .001) and stress response ( r = .713, P = .001) extracted from frequency domain. No between-group differences were observed except those from HRV-derived parameters. Models based on HRVs were the highest predictors of slow/fast HealSpeed (AUC > 0.90), while models based on demographic and clinical information had poor classification performance (AUC = 0.44). This study confirms an association between stress/vagal tone and wound healing in patients with DFUs. In particular, it highlights the importance of vagal tone (relaxation) in expediting wound healing. It also demonstrates the feasibility of assessing physiological stress responses using wearable technology in outpatient clinic during routine clinic visits."
+ },
+ {
+  "id": "kiecolt_glaser_1995",
+  "title": "Slowing of wound healing by psychological stress.",
+  "authors": "Kiecolt-Glaser JK, Marucha PT, Malarkey WB, Mercado AM, Glaser R",
+  "year": 1995,
+  "journal": "Lancet (London, England)",
+  "doi": "10.1016/s0140-6736(95)92899-5",
+  "pmid": "7475659",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/7475659/",
+  "evidence": "Controlled study, 13 caregivers vs 13 controls",
+  "sensors": [
+   "heart_rate"
+  ],
+  "key_findings": "A 3.5 mm punch-biopsy wound took significantly longer to heal in women caring for relatives with Alzheimer's disease than in matched controls (48.7 vs 39.3 days, p < 0.05), linking chronic psychological stress to slower healing.",
+  "abstract": "There is evidence that psychological stress adversely affects the immune system. We have investigated the effects of such stress, caused by caring for a relative with Alzheimer's disease, on wound healing. We studied 13 women caring for demented relatives (mean age 62.3 [SE 2.3] years) and 13 controls matched for age (60.4 [2.8] years) and family income. All subjects underwent a 3.5 mm punch biopsy wound. Healing was assessed by photography of the wound and the response to hydrogen peroxide (healing was defined as no foaming). Wound healing took significantly longer in caregivers than in controls (48.7 [2.9] vs 39.3 [3.0] days, p < 0.05). Peripheral-blood leucocytes from caregivers produced significantly less interleukin-1 beta mRNA in response to lipopolysaccharide stimulation than did controls' cells. Stress-related defects in wound repair could have important clinical implications, for instance for recovery from surgery."
+ },
+ {
+  "id": "wang_2023",
+  "title": "An Overview of Clinical Examinations in the Evaluation and Assessment of Arterial and Venous Insufficiency Wounds.",
+  "authors": "Wang SH, Shyu VB, Chiu WK, Huang RW, Lai BR, Tsai CH",
+  "year": 2023,
+  "journal": "Diagnostics (Basel, Switzerland)",
+  "doi": "10.3390/diagnostics13152494",
+  "pmid": "37568858",
+  "url": "https://pubmed.ncbi.nlm.nih.gov/37568858/",
+  "evidence": "Narrative review",
+  "sensors": [
+   "blood_pressure"
+  ],
+  "key_findings": "Reviews clinical examinations for arterial and venous insufficiency wounds: arterial ulcers are usually examined by physical examination and arterial Doppler studies, venous wounds by duplex ultrasonography. A single arm or wrist blood-pressure value does not assess limb arterial supply.",
+  "abstract": "Arterial and venous insufficiency are two major causes of chronic wounds with different etiology, pathophysiology, and clinical manifestations. With recent advancements in clinical examination, clinicians are able to obtain an accurate diagnosis of the underlying disease, which plays an important role in the treatment planning and management of patients. Arterial ulcers are mainly caused by peripheral artery diseases (PADs), which are traditionally examined by physical examination and non-invasive arterial Doppler studies. However, advanced imaging modalities, such as computed tomography angiography (CTA) and indocyanine green (ICG) angiography, have become important studies as part of a comprehensive diagnostic process. On the other hand, chronic wounds caused by venous insufficiency are mainly evaluated by duplex ultrasonography and venography. Several scoring systems, including Clinical-Etiology-Anatomy-Pathophysiology (CEAP) classification, the Venous Clinical Severity Score (VCSS), the Venous Disability Score, and the Venous Segmental Disease Score (VSDS) are useful in defining disease progression. In this review, we provide a comprehensive overlook of the most widely used and available clinical examinations for arterial and venous insufficiency wounds."
+ }
+]

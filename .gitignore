@@ -6,3 +6,10 @@ __pycache__/
 wound_bandage.db
 .ipynb_checkpoints/
 model_outputs/
+# mobile app build output
+esp32-test/app/node_modules/
+esp32-test/app/dist/
+esp32-test/app/src-tauri/target/
+esp32-test/app/build.log
+data/images/
+data/scans/

@@ -1,0 +1,28 @@
+{
+  "trained_at": "2026-10-12T04:49:09.639304+00:00",
+  "features": [
+    "temperature",
+    "humidity",
+    "moisture"
+  ],
+  "classes": [
+    "healthy",
+    "infected",
+    "wound_healing"
+  ],
+  "training_rows": 20000,
+  "synthetic_rows": 0,
+  "condition_accuracy_holdout": 0.982,
+  "healing_mae_days_holdout": 1.1,
+  "healing_r2_holdout": 0.978,
+  "feature_importance": {
+    "temperature": 0.234,
+    "humidity": 0.273,
+    "moisture": 0.492
+  },
+  "caveats": [
+    "Trained on augmented/synthetic data; accuracy is not clinical validation.",
+    "Healing days come from a severity heuristic, not real patient outcomes.",
+    "The moisture sensor is assumed to map onto the dataset's exudate_level (0-10)."
+  ]
+}

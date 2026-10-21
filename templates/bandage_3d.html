@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WoundSense — 3D Bandage Concept</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0d14;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      background: #0f1420cc;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #1e2a40;
+      z-index: 10;
+      flex-shrink: 0;
+    }
+    header .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    header .logo svg { width: 24px; height: 24px; }
+    header .subtitle { font-size: 0.78rem; color: #64748b; margin-left: 4px; }
+    header .spacer { flex: 1; }
+    header .badge {
+      font-size: 0.72rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid #334155;
+      color: #94a3b8;
+    }
+
+    #canvas-wrapper {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    #three-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Loading overlay */
+    #loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: #0a0d14;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 20;
+      transition: opacity 0.6s;
+    }
+    #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid #1e2a40;
+      border-top-color: #60a5fa;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #load-status { font-size: 0.85rem; color: #94a3b8; }
+    .load-bar-bg { width: 240px; height: 3px; background: #1e2a40; border-radius: 2px; overflow: hidden; }
+    #load-bar { height: 100%; background: #60a5fa; width: 0%; transition: width 0.3s; border-radius: 2px; }
+
+    /* Side panel */
+    #side-panel {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 230px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 10;
+    }
+    .panel-card {
+      background: #0d1321dd;
+      backdrop-filter: blur(14px);
+      border: 1px solid #1e2a40;
+      border-radius: 12px;
+      padding: 13px 15px;
+    }
+    .panel-card h3 {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #4b5e7a;
+      margin-bottom: 10px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.79rem;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .layer-note { font-size: 0.7rem; color: #334155; margin-top: 6px; line-height: 1.55; }
+
+    .ctrl-btn {
+      display: block;
+      width: 100%;
+      padding: 7px 11px;
+      margin-bottom: 5px;
+      background: #141f32;
+      border: 1px solid #1e2a40;
+      border-radius: 8px;
+      color: #94a3b8;
+      font-size: 0.78rem;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .ctrl-btn:hover { background: #1a2d47; border-color: #2d4a6e; color: #cbd5e1; }
+    .ctrl-btn.active { background: #162849; border-color: #3b82f6; color: #60a5fa; }
+    .ctrl-btn:last-child { margin-bottom: 0; }
+
+    #hint {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.71rem;
+      color: #334155;
+      background: #0d1321bb;
+      padding: 4px 14px;
+      border-radius: 999px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* Debug info */
+    #debug-info {
+      position: absolute;
+      bottom: 40px;
+      left: 16px;
+      font-size: 0.68rem;
+      color: #1e3a5a;
+      pointer-events: none;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round">
+      <rect x="3" y="8" width="18" height="8" rx="2"/>
+      <path d="M12 8v8M7 12h10"/>
+    </svg>
+    WoundSense
+  </div>
+  <span class="subtitle">3D Concept Prototype</span>
+  <span class="spacer"></span>
+  <span class="badge">Design Preview</span>
+</header>
+
+<div id="canvas-wrapper">
+  <canvas id="three-canvas"></canvas>
+
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div id="load-status">Loading models…</div>
+    <div class="load-bar-bg"><div id="load-bar"></div></div>
+  </div>
+
+  <div id="side-panel">
+    <div class="panel-card">
+      <h3>Component Legend</h3>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#3b82f6;"></span> ESP32 Microcontroller
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#10b981;"></span> DHT11 Temp / Humidity
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#f59e0b;"></span> Smart Bandage
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#6b7280;"></span> Forearm
+      </div>
+      <p class="layer-note">In the final design the DHT11 will be embedded in the absorbent layer beneath the ESP32.</p>
+    </div>
+
+    <div class="panel-card">
+      <h3>Views</h3>
+      <button class="ctrl-btn" id="btn-top">⬆ Top view</button>
+      <button class="ctrl-btn" id="btn-front">⬛ Front view</button>
+      <button class="ctrl-btn" id="btn-side">⬅ Side view</button>
+      <button class="ctrl-btn active" id="btn-iso">◈ Isometric</button>
+    </div>
+
+    <div class="panel-card">
+      <h3>Toggle Parts</h3>
+      <button class="ctrl-btn active" id="tog-arm">👁 Arm</button>
+      <button class="ctrl-btn active" id="tog-bandage">👁 Bandage</button>
+      <button class="ctrl-btn active" id="tog-esp">👁 ESP32</button>
+      <button class="ctrl-btn active" id="tog-dht">👁 DHT11 Sensor</button>
+    </div>
+  </div>
+
+  <div id="hint">Drag to orbit · Scroll to zoom · Right-drag to pan</div>
+  <div id="debug-info"></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+
+// ── Renderer ────────────────────────────────────────────────────────────────
+const canvas  = document.getElementById('three-canvas');
+const wrapper = document.getElementById('canvas-wrapper');
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+renderer.toneMapping       = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+renderer.outputColorSpace  = THREE.SRGBColorSpace;
+
+// ── Scene ───────────────────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x080c18);
+scene.fog = new THREE.FogExp2(0x080c18, 0.028);
+
+// ── Camera ──────────────────────────────────────────────────────────────────
+const camera = new THREE.PerspectiveCamera(38, 1, 0.01, 60);
+camera.position.set(0.3, 0.6, 1.4);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping  = true;
+controls.dampingFactor  = 0.065;
+controls.minDistance    = 0.2;
+controls.maxDistance    = 6;
+controls.target.set(0, 0, 0);
+
+// ── Lights ──────────────────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0x8ab4f8, 0.7));
+
+const key = new THREE.DirectionalLight(0xffffff, 2.5);
+key.position.set(2, 4, 2.5);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+Object.assign(key.shadow.camera, { near: 0.1, far: 30, left: -2, right: 2, top: 2, bottom: -2 });
+scene.add(key);
+
+const fill = new THREE.DirectionalLight(0x60a5fa, 0.6);
+fill.position.set(-3, 1, -1);
+scene.add(fill);
+
+const rim = new THREE.DirectionalLight(0x34d399, 0.3);
+rim.position.set(0, -2, -3);
+scene.add(rim);
+
+// ── Ground ──────────────────────────────────────────────────────────────────
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(20, 20),
+  new THREE.MeshStandardMaterial({ color: 0x0d1117, roughness: 1 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -0.5;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const grid = new THREE.GridHelper(12, 60, 0x1a2540, 0x1a2540);
+grid.position.y = -0.499;
+grid.material.opacity = 0.35;
+grid.material.transparent = true;
+scene.add(grid);
+
+// ── DRACO ───────────────────────────────────────────────────────────────────
+const draco = new DRACOLoader();
+draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/libs/draco/');
+
+const loader = new GLTFLoader();
+loader.setDRACOLoader(draco);
+
+// ── Loading UI ──────────────────────────────────────────────────────────────
+const loadStatus = document.getElementById('load-status');
+const loadBar    = document.getElementById('load-bar');
+const overlay    = document.getElementById('loading-overlay');
+const debugEl    = document.getElementById('debug-info');
+
+let loaded = 0;
+const TOTAL = 4;
+function onDone(label) {
+  loaded++;
+  loadBar.style.width = (loaded / TOTAL * 100) + '%';
+  loadStatus.textContent = `Loaded: ${label}`;
+  if (loaded >= TOTAL) {
+    assembleScene();
+    setTimeout(() => overlay.classList.add('hidden'), 700);
+  }
+}
+
+// ── Utility: normalise a GLTF scene to target size ─────────────────────────
+function normalise(obj, targetSize) {
+  const box  = new THREE.Box3().setFromObject(obj);
+  const size = new THREE.Vector3();
+  box.getSize(size);
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale  = targetSize / maxDim;
+  obj.scale.setScalar(scale);
+  // re-centre pivot to bounding box centre
+  const box2   = new THREE.Box3().setFromObject(obj);
+  const centre = new THREE.Vector3();
+  box2.getCenter(centre);
+  obj.position.sub(centre);
+  return { scale, originalSize: size, normBox: box2 };
+}
+
+// ── Model store ─────────────────────────────────────────────────────────────
+const raw = {}; // raw gltf scenes, not yet in scene graph
+
+function loadGLB(url, key, label) {
+  loader.load(url,
+    gltf => {
+      raw[key] = gltf.scene;
+      raw[key].traverse(c => {
+        if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; }
+      });
+      onDone(label);
+    },
+    undefined,
+    err => { console.error(key, err); raw[key] = new THREE.Group(); onDone(label + ' ERR'); }
+  );
+}
+
+loadGLB('/static/models/anatomy_-_male_arm.glb',                  'arm',     'Male Arm');
+loadGLB('/static/models/bandage.glb',                             'bandage', 'Bandage');
+loadGLB('/static/models/esp32.glb',                               'esp',     'ESP32');
+loadGLB('/static/models/temperature_and_humidity_sensor_dht11.glb','dht',    'DHT11');
+
+// ── Main assembly — called once all 4 models are loaded ──────────────────────
+const models = {};
+
+function assembleScene() {
+
+  // ── 1. ARM — rotate so it lies horizontally along X axis ─────────────────
+  const arm = raw.arm;
+
+  // First normalise to a known size (0.7 unit long-axis)
+  normalise(arm, 0.7);
+
+  // The arm GLB is likely standing upright (tall along Y).
+  // Rotate -90° around Z so it lies along +X (wrist to the right).
+  arm.rotation.z = -Math.PI / 2;
+
+  // After rotation recompute bbox so we know where the forearm top surface is
+  arm.updateMatrixWorld(true);
+  const armBox    = new THREE.Box3().setFromObject(arm);
+  const armCenter = new THREE.Vector3();
+  armBox.getCenter(armCenter);
+  const armSize   = new THREE.Vector3();
+  armBox.getSize(armSize);
+
+  // Shift arm so it sits above ground, centred at origin
+  arm.position.x -= armCenter.x;
+  arm.position.y -= armCenter.y;
+  arm.position.z -= armCenter.z;
+  arm.position.y -= armBox.min.y - 0.05; // raise slightly above grid
+
+  arm.updateMatrixWorld(true);
+  const armBoxFinal = new THREE.Box3().setFromObject(arm);
+  const armTop      = armBoxFinal.max.y;  // top surface Y of arm
+  const armLen      = armBoxFinal.max.x - armBoxFinal.min.x;
+  const armMidX     = (armBoxFinal.max.x + armBoxFinal.min.x) / 2;
+  // Forearm section is roughly the upper 40% of the arm length (near the wrist)
+  const forearmX    = armMidX + armLen * 0.12; // a bit toward wrist
+  const forearmZ    = (armBoxFinal.max.z + armBoxFinal.min.z) / 2;
+
+  scene.add(arm);
+  models.arm = arm;
+
+  debugEl.textContent =
+    `arm top Y=${armTop.toFixed(3)} | armLen=${armLen.toFixed(3)} | forearmX=${forearmX.toFixed(3)}`;
+
+  // ── 2. BANDAGE — sits flat on top of the forearm ─────────────────────────
+  const bandage = raw.bandage;
+  normalise(bandage, 0.18);  // bandage ~18% of scene unit
+
+  // Rotate bandage so it lies flat (if it's standing up, rotate X)
+  bandage.rotation.x = -Math.PI / 2;  // lay flat
+  bandage.updateMatrixWorld(true);
+  const bndBox    = new THREE.Box3().setFromObject(bandage);
+  const bndCenter = new THREE.Vector3();
+  bndBox.getCenter(bndCenter);
+
+  // Place bandage centred on forearm, sitting on arm top surface
+  bandage.position.x = forearmX  - bndCenter.x;
+  bandage.position.z = forearmZ  - bndCenter.z;
+  bandage.position.y = armTop    - bndBox.min.y + 0.001; // flush with arm surface
+
+  bandage.updateMatrixWorld(true);
+  const bndBoxFinal = new THREE.Box3().setFromObject(bandage);
+  const bndTop      = bndBoxFinal.max.y;
+
+  scene.add(bandage);
+  models.bandage = bandage;
+
+  // ── 3. ESP32 — centred on bandage, on top ────────────────────────────────
+  const esp = raw.esp;
+  normalise(esp, 0.09);  // ESP32 is ~9% scene unit
+
+  esp.rotation.x = -Math.PI / 2;
+  esp.updateMatrixWorld(true);
+  const espBox    = new THREE.Box3().setFromObject(esp);
+  const espCenter = new THREE.Vector3();
+  espBox.getCenter(espCenter);
+
+  esp.position.x = forearmX  - espCenter.x - 0.01;
+  esp.position.z = forearmZ  - espCenter.z;
+  esp.position.y = bndTop    - espBox.min.y + 0.002;
+
+  scene.add(esp);
+  models.esp = esp;
+
+  esp.updateMatrixWorld(true);
+  const espBoxFinal = new THREE.Box3().setFromObject(esp);
+  const espTop      = espBoxFinal.max.y;
+
+  // ── 4. DHT11 — adjacent to ESP32 on the bandage ──────────────────────────
+  const dht = raw.dht;
+  normalise(dht, 0.055);
+
+  dht.rotation.x = -Math.PI / 2;
+  dht.updateMatrixWorld(true);
+  const dhtBox    = new THREE.Box3().setFromObject(dht);
+  const dhtCenter = new THREE.Vector3();
+  dhtBox.getCenter(dhtCenter);
+
+  // Place DHT11 beside the ESP32 (offset along Z)
+  dht.position.x = forearmX  - dhtCenter.x + 0.055;
+  dht.position.z = forearmZ  - dhtCenter.z - 0.03;
+  dht.position.y = bndTop    - dhtBox.min.y + 0.002;
+
+  scene.add(dht);
+  models.dht = dht;
+
+  // ── Point camera at the assembly ─────────────────────────────────────────
+  const focusX = forearmX;
+  const focusY = armTop;
+  controls.target.set(focusX, focusY, forearmZ);
+  camera.position.set(focusX, focusY + 0.35, forearmZ + 0.7);
+  controls.update();
+
+  // Set camera preset helpers to use real coordinates
+  window._focus = { x: focusX, y: focusY + 0.05, z: forearmZ };
+}
+
+// ── Camera presets ───────────────────────────────────────────────────────────
+function animateTo(pos, tgt, ms = 900) {
+  const sp = camera.position.clone();
+  const st = controls.target.clone();
+  const ep = new THREE.Vector3(...pos);
+  const et = new THREE.Vector3(...tgt);
+  const t0 = performance.now();
+  (function tick(now) {
+    const t = Math.min((now - t0) / ms, 1);
+    const e = t < 0.5 ? 2*t*t : -1 + (4 - 2*t)*t;
+    camera.position.lerpVectors(sp, ep, e);
+    controls.target.lerpVectors(st, et, e);
+    controls.update();
+    if (t < 1) requestAnimationFrame(tick);
+  })(t0);
+}
+
+// All preset buttons reference _focus which is set after models load
+function getF() { return window._focus || { x: 0, y: 0, z: 0 }; }
+
+document.getElementById('btn-top').addEventListener('click', () => {
+  const f = getF();
+  animateTo([f.x, f.y + 1.1, f.z + 0.001], [f.x, f.y, f.z]);
+});
+document.getElementById('btn-front').addEventListener('click', () => {
+  const f = getF();
+  animateTo([f.x, f.y + 0.15, f.z + 0.9], [f.x, f.y, f.z]);
+});
+document.getElementById('btn-side').addEventListener('click', () => {
+  const f = getF();
+  animateTo([f.x - 0.9, f.y + 0.2, f.z], [f.x, f.y, f.z]);
+});
+document.getElementById('btn-iso').addEventListener('click', () => {
+  const f = getF();
+  animateTo([f.x - 0.2, f.y + 0.5, f.z + 0.9], [f.x, f.y, f.z]);
+});
+
+// ── Visibility toggles ───────────────────────────────────────────────────────
+function togPart(key, id) {
+  document.getElementById(id).addEventListener('click', function () {
+    if (!models[key]) return;
+    models[key].visible = !models[key].visible;
+    this.classList.toggle('active', models[key].visible);
+    this.textContent = (models[key].visible ? '👁 ' : '🚫 ') + this.textContent.replace(/^(👁|🚫) /, '');
+  });
+}
+togPart('arm',     'tog-arm');
+togPart('bandage', 'tog-bandage');
+togPart('esp',     'tog-esp');
+togPart('dht',     'tog-dht');
+
+// ── Resize ───────────────────────────────────────────────────────────────────
+function resize() {
+  const w = wrapper.clientWidth, h = wrapper.clientHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ── Render loop ──────────────────────────────────────────────────────────────
+let t = 0;
+(function animate(now) {
+  requestAnimationFrame(animate);
+  t = now * 0.001;
+  // Gentle pulse on the electronics
+  if (models.esp) models.esp.position.y += Math.sin(t * 2) * 0.00004;
+  if (models.dht) models.dht.position.y += Math.sin(t * 2 + 0.4) * 0.00004;
+  controls.update();
+  renderer.render(scene, camera);
+})();
+</script>
+</body>
+</html>
+

@@ -1,0 +1,173 @@
+{
+  "trained_at": "2026-10-20T07:11:27.893698+00:00",
+  "embedding_model": "Qdrant/clip-ViT-B-32-vision",
+  "dataset": "huggingface.co/datasets/rupeshsah/wound (Apache-2.0)",
+  "images": 1564,
+  "near_duplicate_pairs": 651,
+  "independent_groups": 937,
+  "type": {
+    "classes": [
+      "Abrasion",
+      "Bruises",
+      "Burn",
+      "Cut",
+      "Diabetic",
+      "Laceration",
+      "Normal",
+      "Pressure",
+      "Surgical",
+      "Venous"
+    ],
+    "cv_accuracy": 0.776,
+    "cv_macro_f1": 0.802,
+    "majority_baseline": 0.214,
+    "per_class_recall": {
+      "Abrasion": 0.893,
+      "Bruises": 0.956,
+      "Burn": 0.816,
+      "Cut": 0.706,
+      "Diabetic": 0.769,
+      "Laceration": 0.843,
+      "Normal": 1.0,
+      "Pressure": 0.672,
+      "Surgical": 0.558,
+      "Venous": 0.91
+    },
+    "confusion_matrix": [
+      [
+        75,
+        1,
+        2,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4
+      ],
+      [
+        4,
+        129,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        0,
+        71,
+        0,
+        5,
+        0,
+        0,
+        4,
+        2,
+        1
+      ],
+      [
+        1,
+        0,
+        2,
+        24,
+        0,
+        4,
+        0,
+        0,
+        3,
+        0
+      ],
+      [
+        0,
+        0,
+        12,
+        0,
+        236,
+        0,
+        0,
+        29,
+        14,
+        16
+      ],
+      [
+        0,
+        0,
+        2,
+        2,
+        0,
+        59,
+        0,
+        2,
+        3,
+        2
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        52,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        6,
+        0,
+        55,
+        3,
+        4,
+        225,
+        29,
+        13
+      ],
+      [
+        0,
+        0,
+        8,
+        0,
+        33,
+        4,
+        4,
+        27,
+        120,
+        19
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        8,
+        2,
+        5,
+        2,
+        5,
+        223
+      ]
+    ]
+  },
+  "severity": {
+    "kept": true,
+    "cv_accuracy": 0.795,
+    "cv_macro_f1": 0.765,
+    "type_only_baseline_macro_f1": 0.623,
+    "note": "Labels look machine-generated; kept only if it beats guessing from the true type."
+  },
+  "ood_similarity_threshold": 0.8743,
+  "caveats": [
+    "Wound-type labels come from an image collection; severity/description text looks machine-generated.",
+    "No infection or healing-time labels exist in this data; the model predicts neither.",
+    "Images are web-collected at 350x350, not clinical photos taken with a standard protocol.",
+    "Cross-validated, duplicate-grouped accuracy; not clinical validation."
+  ]
+}

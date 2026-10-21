@@ -9,3 +9,10 @@ model_outputs/
 # PhysioNet 2019 external test data (downloaded by validation/download_physionet2019.py)
 data/physionet_2019/
 .venv/
+# mobile app build output
+esp32-test/app/node_modules/
+esp32-test/app/dist/
+esp32-test/app/src-tauri/target/
+esp32-test/app/build.log
+data/images/
+data/scans/

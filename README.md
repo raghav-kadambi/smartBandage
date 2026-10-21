@@ -46,6 +46,11 @@ pH, exudate and SpO2 were removed: the hardware has no sensors for them.
   10 interventions. Each sensor-to-state threshold names the paper it comes from.
 - **Patient chat**: Groq-backed LLM prompted with the live reading, trend, wound details and the
   retrieved literature. It is told to cite only the retrieved papers.
+- **Mobile app** (`esp32-test/app/`, Tauri v2 for Android): live readings from the bandage (BLE) and an
+  MS1020 watch, the same validated model and PubMed RAG as the website, wound-photo scans, a
+  *Model & validation* screen with the PhysioNet results, and a research library. Served by
+  `mobile_server.py` (`/api/m/*`, token auth). Screens are in `report_screenshots/`; setup in
+  `esp32-test/README.md`.
 
 ## Setup
 
@@ -139,6 +144,7 @@ smartBandage/
 ├── database.py                    # SQLite helpers (users, readings, devices, chat, wound context)
 ├── rag_service.py                 # Qdrant + FastEmbed retrieval over the PubMed corpus
 ├── knowledge_graph.py             # NetworkX graph of papers / sensors / states / interventions
+├── mobile_api.py, mobile_server.py # /api/m JSON API for the phone app (same model + RAG)
 ├── data/
 │   ├── generate_training_data.py  # knowledge-based training set
 │   ├── wound_data_train.csv
@@ -148,10 +154,12 @@ smartBandage/
 ├── models/                        # train_model.py, *.pkl, metadata.json, external_validation.json
 ├── validation/                    # PhysioNet 2019 download + external validation
 ├── firmware/esp32_smart_bandage/  # Arduino sketch for the ESP32
+├── esp32-test/                    # mobile app (Tauri) + BLE bandage firmware
+├── report_screenshots/            # mobile app screens
 ├── model_outputs/                 # validation figures
 ├── model_training.ipynb           # walkthrough: generate -> train -> validate
 ├── static/, templates/            # front end (mode_select.html, dashboard.html, ...)
-└── tests/test_rag_and_graph.py
+└── tests/                         # test_rag_and_graph.py, test_mobile_api.py
 ```
 
 ## Notes for the review

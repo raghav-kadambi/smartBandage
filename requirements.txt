@@ -11,3 +11,5 @@ networkx>=3.4.0
 matplotlib==3.9.2
 scipy>=1.11
 requests>=2.31
+Pillow>=10.0
+huggingface_hub>=0.30

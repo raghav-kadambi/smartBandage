@@ -156,6 +156,14 @@ def knowledge_graph_page():
     return render_template("knowledge_graph.html", user_name=session.get("user_name"))
 
 
+
+
+@app.route("/bandage-3d")
+@login_required
+def bandage_3d_page():
+    return render_template("bandage_3d.html", user_name=session.get("user_name"))
+
+
 @app.route("/logout")
 def logout():
     session.clear()
